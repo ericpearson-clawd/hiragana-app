@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import confetti from 'canvas-confetti';
 import { hiragana, shuffle, groups, yoonGroups, allGroups } from '../data/hiragana';
 
 export default function Flashcards({ recordAttempt, updateStreak, getMastery, getWeakCharacters }) {
@@ -86,7 +87,16 @@ export default function Flashcards({ recordAttempt, updateStreak, getMastery, ge
       setCurrentIndex(currentIndex + 1);
       setFlipped(false);
     } else {
-      // Session complete
+      // Session complete - trigger confetti if good accuracy
+      const total = sessionStats.correct + sessionStats.incorrect + 1;
+      const correctTotal = sessionStats.correct + (knew ? 1 : 0);
+      if (correctTotal / total >= 0.8) {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }
       setIsStarted(false);
     }
   };

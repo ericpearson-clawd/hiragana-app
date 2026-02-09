@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import confetti from 'canvas-confetti';
 import { hiragana, shuffle } from '../data/hiragana';
 
 export default function Quiz({ recordAttempt, updateStreak }) {
@@ -95,6 +96,16 @@ export default function Quiz({ recordAttempt, updateStreak }) {
       setSelectedAnswer(null);
       setShowResult(false);
     } else {
+      // Quiz complete - trigger confetti if good score
+      const total = sessionStats.correct + sessionStats.incorrect + 1;
+      const accuracy = (sessionStats.correct + (selectedAnswer?.correct ? 1 : 0)) / total * 100;
+      if (accuracy >= 80) {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }
       setQuizMode('complete');
     }
   };
