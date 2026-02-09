@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { hiragana, shuffle, groups, yoonGroups, allGroups } from '../data/hiragana';
+import { getMnemonic } from '../data/mnemonics';
 
 export default function Flashcards({ recordAttempt, updateStreak, getMastery, getWeakCharacters }) {
   const [deck, setDeck] = useState([]);
@@ -10,6 +11,7 @@ export default function Flashcards({ recordAttempt, updateStreak, getMastery, ge
   const [sessionStats, setSessionStats] = useState({ correct: 0, incorrect: 0 });
   const [isStarted, setIsStarted] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState(null);
+  const [showHint, setShowHint] = useState(false);
   const touchStartRef = useRef(null);
 
   // Touch swipe handling
@@ -119,6 +121,7 @@ export default function Flashcards({ recordAttempt, updateStreak, getMastery, ge
     if (currentIndex < deck.length - 1) {
       setCurrentIndex(currentIndex + 1);
       setFlipped(false);
+      setShowHint(false);
     } else {
       // Session complete - trigger confetti if good accuracy
       const total = sessionStats.correct + sessionStats.incorrect + 1;
@@ -286,6 +289,15 @@ export default function Flashcards({ recordAttempt, updateStreak, getMastery, ge
               <div className="character-card-back">
                 <div className="hiragana-display jp">{currentCard?.char}</div>
                 <div className="romaji-display">{currentCard?.romaji}</div>
+                {showHint && getMnemonic(currentCard?.char) && (
+                  <div className="mnemonic-hint">💡 {getMnemonic(currentCard?.char)}</div>
+                )}
+                <button 
+                  className="hint-btn"
+                  onClick={(e) => { e.stopPropagation(); setShowHint(!showHint); }}
+                >
+                  {showHint ? '🙈 Hide Hint' : '💡 Show Hint'}
+                </button>
                 <div className="swipe-hint">← Swipe to respond →</div>
               </div>
             </div>
@@ -365,6 +377,37 @@ const styles = `
     .swipe-hint {
       display: none;
     }
+  }
+
+  .mnemonic-hint {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    right: 1rem;
+    background: rgba(255,255,255,0.15);
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: rgba(255,255,255,0.9);
+    animation: fadeIn 0.3s ease;
+  }
+
+  .hint-btn {
+    position: absolute;
+    bottom: 3rem;
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .hint-btn:hover {
+    background: rgba(255,255,255,0.3);
   }
 
   .card-hint {
