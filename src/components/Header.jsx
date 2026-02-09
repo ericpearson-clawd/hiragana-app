@@ -123,20 +123,22 @@ export default function Header({ darkMode, onToggleTheme }) {
             right: 0;
             background: var(--bg-secondary);
             border-top: 1px solid var(--border);
-            padding: 0.5rem;
+            padding: 0.5rem 0.25rem;
             justify-content: space-around;
             z-index: 100;
           }
           
           .nav-link {
             flex-direction: column;
-            padding: 0.5rem;
+            padding: 0.5rem 0.25rem;
             font-size: 0.75rem;
             gap: 0.25rem;
+            min-width: 0;
           }
           
           .nav-label {
-            font-size: 0.7rem;
+            font-size: 0.6rem;
+            white-space: nowrap;
           }
           
           .logo-text {
@@ -145,6 +147,10 @@ export default function Header({ darkMode, onToggleTheme }) {
           
           .header-content {
             height: 56px;
+          }
+          
+          .theme-toggle {
+            display: none;
           }
         }
       `}</style>

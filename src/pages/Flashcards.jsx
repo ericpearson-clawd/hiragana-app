@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { hiragana, shuffle, groups, yoonGroups, allGroups } from '../data/hiragana';
 
@@ -9,6 +9,39 @@ export default function Flashcards({ recordAttempt, updateStreak, getMastery, ge
   const [selectedGroups, setSelectedGroups] = useState(['all']);
   const [sessionStats, setSessionStats] = useState({ correct: 0, incorrect: 0 });
   const [isStarted, setIsStarted] = useState(false);
+  const [swipeDirection, setSwipeDirection] = useState(null);
+  const touchStartRef = useRef(null);
+
+  // Touch swipe handling
+  const handleTouchStart = (e) => {
+    touchStartRef.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e) => {
+    if (!touchStartRef.current || !flipped) return;
+    
+    const touchEnd = e.changedTouches[0].clientX;
+    const diff = touchEnd - touchStartRef.current;
+    
+    if (Math.abs(diff) > 50) { // Minimum swipe distance
+      if (diff > 0) {
+        // Swipe right = I knew it
+        setSwipeDirection('right');
+        setTimeout(() => {
+          handleResponse(true);
+          setSwipeDirection(null);
+        }, 200);
+      } else {
+        // Swipe left = Still learning
+        setSwipeDirection('left');
+        setTimeout(() => {
+          handleResponse(false);
+          setSwipeDirection(null);
+        }, 200);
+      }
+    }
+    touchStartRef.current = null;
+  };
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -238,16 +271,22 @@ export default function Flashcards({ recordAttempt, updateStreak, getMastery, ge
           </div>
         </div>
 
-        <div className="flashcard-area" onClick={handleFlip}>
+        <div 
+          className={`flashcard-area ${swipeDirection ? `swipe-${swipeDirection}` : ''}`} 
+          onClick={handleFlip}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
           <div className={`character-card ${flipped ? 'flipped' : ''}`}>
             <div className="character-card-inner">
               <div className="character-card-front">
                 <div className="hiragana-display jp">{currentCard?.char}</div>
-                <div className="card-hint">Tap to reveal (or press Space)</div>
+                <div className="card-hint">Tap to reveal</div>
               </div>
               <div className="character-card-back">
                 <div className="hiragana-display jp">{currentCard?.char}</div>
                 <div className="romaji-display">{currentCard?.romaji}</div>
+                <div className="swipe-hint">← Swipe to respond →</div>
               </div>
             </div>
           </div>
@@ -302,6 +341,30 @@ const styles = `
     align-items: center;
     min-height: 350px;
     margin-bottom: 2rem;
+    transition: transform 0.2s ease;
+  }
+
+  .flashcard-area.swipe-left {
+    transform: translateX(-100px) rotate(-5deg);
+    opacity: 0.5;
+  }
+
+  .flashcard-area.swipe-right {
+    transform: translateX(100px) rotate(5deg);
+    opacity: 0.5;
+  }
+
+  .swipe-hint {
+    position: absolute;
+    bottom: 1rem;
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.7);
+  }
+
+  @media (min-width: 769px) {
+    .swipe-hint {
+      display: none;
+    }
   }
 
   .card-hint {
