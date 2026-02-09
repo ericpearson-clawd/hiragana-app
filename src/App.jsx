@@ -82,6 +82,7 @@ function App() {
                   getMastery={getMastery}
                   getOverallMastery={getOverallMastery}
                   getUnpracticedCount={getUnpracticedCount}
+                  currentScript={progress.currentScript}
                 />
               } 
             />

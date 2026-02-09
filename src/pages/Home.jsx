@@ -4,7 +4,7 @@ import ReviewSchedule from '../components/ReviewSchedule';
 import WeakCharacters from '../components/WeakCharacters';
 import PracticeRecommendations from '../components/PracticeRecommendations';
 
-export default function Home({ progress, getOverallMastery, getUnpracticedCount, getMastery }) {
+export default function Home({ progress, getOverallMastery, getUnpracticedCount, getMastery, currentScript = 'hiragana' }) {
   const mastery = getOverallMastery();
   const unpracticed = getUnpracticedCount();
   const practiced = 109 - unpracticed;
@@ -39,10 +39,10 @@ export default function Home({ progress, getOverallMastery, getUnpracticedCount,
       <div className="container">
         <div className="home-hero animate-fade-in">
           <h1 className="home-title">
-            Master <span className="gradient-text">Hiragana</span>
+            Master <span className="gradient-text">{currentScript === 'hiragana' ? 'Hiragana' : 'Katakana'}</span>
           </h1>
           <p className="home-subtitle">
-            Learn all 109 Japanese hiragana characters through interactive flashcards and quizzes
+            Learn all 109 Japanese {currentScript} characters through interactive flashcards and quizzes
           </p>
         </div>
 
@@ -212,7 +212,7 @@ export default function Home({ progress, getOverallMastery, getUnpracticedCount,
           <div className="info-grid">
             <div className="info-item">
               <span className="info-count">46</span>
-              <span className="info-label">Basic Hiragana</span>
+              <span className="info-label">Basic {currentScript === 'hiragana' ? 'Hiragana' : 'Katakana'}</span>
             </div>
             <div className="info-item">
               <span className="info-count">25</span>
