@@ -10,6 +10,29 @@ export default function Quiz({ recordAttempt, updateStreak }) {
   const [sessionStats, setSessionStats] = useState({ correct: 0, incorrect: 0 });
   const [streak, setStreak] = useState(0);
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    if (!quizMode || quizMode === 'complete') return;
+    
+    const handleKeyDown = (e) => {
+      if (showResult) {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          nextQuestion();
+        }
+      } else {
+        const keyNum = parseInt(e.key);
+        if (keyNum >= 1 && keyNum <= 4) {
+          const option = questions[currentIndex]?.options[keyNum - 1];
+          if (option) handleAnswer(option);
+        }
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [quizMode, showResult, currentIndex, questions]);
+
   const generateQuestions = useCallback((mode) => {
     const shuffled = shuffle([...hiragana]);
     const selected = shuffled.slice(0, 20); // 20 questions per quiz
@@ -207,6 +230,7 @@ export default function Quiz({ recordAttempt, updateStreak }) {
               onClick={() => handleAnswer(option)}
               disabled={showResult}
             >
+              <span className="option-key">{index + 1}</span>
               {option.value}
             </button>
           ))}
@@ -295,6 +319,21 @@ const styles = `
   .quiz-option.disabled {
     opacity: 0.5;
     pointer-events: none;
+  }
+
+  .option-key {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    font-size: 0.625rem;
+    color: var(--text-muted);
+    background: var(--bg-tertiary);
+    padding: 0.125rem 0.375rem;
+    border-radius: 4px;
+  }
+
+  .quiz-option {
+    position: relative;
   }
 
   .quiz-feedback {

@@ -9,6 +9,31 @@ export default function Flashcards({ recordAttempt, updateStreak, getMastery }) 
   const [sessionStats, setSessionStats] = useState({ correct: 0, incorrect: 0 });
   const [isStarted, setIsStarted] = useState(false);
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    if (!isStarted) return;
+    
+    const handleKeyDown = (e) => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        if (!flipped) {
+          setFlipped(true);
+        }
+      } else if (flipped) {
+        if (e.key === 'ArrowLeft' || e.key === '1') {
+          handleResponse(false);
+        } else if (e.key === 'ArrowRight' || e.key === '2') {
+          handleResponse(true);
+        }
+      } else if (e.key === 'ArrowRight') {
+        handleResponse(false); // Skip
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isStarted, flipped, currentIndex, deck]);
+
   // Build deck based on selected groups
   const buildDeck = useCallback(() => {
     let cards = [];
@@ -188,7 +213,7 @@ export default function Flashcards({ recordAttempt, updateStreak, getMastery }) 
             <div className="character-card-inner">
               <div className="character-card-front">
                 <div className="hiragana-display jp">{currentCard?.char}</div>
-                <div className="card-hint">Tap to reveal</div>
+                <div className="card-hint">Tap to reveal (or press Space)</div>
               </div>
               <div className="character-card-back">
                 <div className="hiragana-display jp">{currentCard?.char}</div>
@@ -204,13 +229,13 @@ export default function Flashcards({ recordAttempt, updateStreak, getMastery }) 
               className="btn btn-error btn-lg response-btn"
               onClick={(e) => { e.stopPropagation(); handleResponse(false); }}
             >
-              😕 Still Learning
+              <span className="response-key">←</span> 😕 Still Learning
             </button>
             <button 
               className="btn btn-success btn-lg response-btn"
               onClick={(e) => { e.stopPropagation(); handleResponse(true); }}
             >
-              😊 I Knew It!
+              😊 I Knew It! <span className="response-key">→</span>
             </button>
           </div>
         )}
@@ -266,6 +291,15 @@ const styles = `
 
   .response-btn {
     flex: 1;
+  }
+
+  .response-key {
+    display: inline-block;
+    padding: 0.125rem 0.375rem;
+    background: rgba(255,255,255,0.2);
+    border-radius: 4px;
+    font-size: 0.75rem;
+    margin: 0 0.25rem;
   }
 
   .skip-hint {
