@@ -13,6 +13,7 @@ export default function Flashcards({ recordAttempt, updateStreak, getMastery, ge
   const [isStarted, setIsStarted] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState(null);
   const [showHint, setShowHint] = useState(false);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const touchStartRef = useRef(null);
 
   // Touch swipe handling
@@ -367,14 +368,14 @@ export default function Flashcards({ recordAttempt, updateStreak, getMastery, ge
 const styles = `
   .flashcard-header {
     max-width: 400px;
-    margin: 0 auto 2rem;
+    margin: 0 auto var(--space-xl);
   }
 
   .progress-info {
     text-align: center;
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--space-sm);
     color: var(--text-muted);
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
   }
 
   .flashcard-area {
@@ -382,7 +383,7 @@ const styles = `
     justify-content: center;
     align-items: center;
     min-height: 350px;
-    margin-bottom: 2rem;
+    margin-bottom: var(--space-xl);
     transition: transform 0.2s ease;
   }
 
@@ -398,9 +399,9 @@ const styles = `
 
   .swipe-hint {
     position: absolute;
-    bottom: 1rem;
-    font-size: 0.75rem;
-    color: rgba(255,255,255,0.7);
+    bottom: var(--space-md);
+    font-size: var(--font-size-sm);
+    color: rgba(255,255,255,0.8);
   }
 
   @media (min-width: 769px) {
@@ -411,47 +412,49 @@ const styles = `
 
   .mnemonic-hint {
     position: absolute;
-    top: 1rem;
-    left: 1rem;
-    right: 1rem;
+    top: var(--space-md);
+    left: var(--space-md);
+    right: var(--space-md);
     background: rgba(255,255,255,0.15);
-    padding: 0.75rem;
-    border-radius: 8px;
-    font-size: 0.875rem;
-    line-height: 1.4;
-    color: rgba(255,255,255,0.9);
-    animation: fadeIn 0.3s ease;
+    padding: var(--space-md);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
+    color: rgba(255,255,255,0.95);
+    animation: feedback-flash 0.3s ease;
   }
 
   .hint-btn {
     position: absolute;
-    bottom: 3rem;
+    bottom: var(--space-2xl);
     background: rgba(255,255,255,0.2);
     border: 1px solid rgba(255,255,255,0.3);
     color: white;
-    padding: 0.5rem 1rem;
+    padding: var(--space-sm) var(--space-md);
+    min-height: var(--touch-min);
     border-radius: 20px;
-    font-size: 0.75rem;
+    font-size: var(--font-size-sm);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--transition-fast);
   }
 
   .hint-btn:hover {
     background: rgba(255,255,255,0.3);
+    transform: scale(1.05);
   }
 
   .audio-btn {
     position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
-    width: 2.5rem;
-    height: 2.5rem;
+    top: var(--space-md);
+    right: var(--space-md);
+    width: var(--touch-min);
+    height: var(--touch-min);
     background: rgba(255,255,255,0.2);
     border: 1px solid rgba(255,255,255,0.3);
     border-radius: 50%;
-    font-size: 1.25rem;
+    font-size: var(--font-size-xl);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--transition-fast);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -466,10 +469,15 @@ const styles = `
     transform: scale(0.95);
   }
 
+  .audio-btn:focus-visible {
+    outline: 2px solid var(--feedback-focus);
+    outline-offset: 2px;
+  }
+
   .audio-btn.playing {
-    animation: audioPlaying 0.8s ease-in-out infinite;
-    background: var(--primary);
-    border-color: var(--primary);
+    animation: audioPlaying 0.6s ease-in-out infinite;
+    background: var(--feedback-focus);
+    border-color: var(--feedback-focus);
   }
 
   @keyframes audioPlaying {
@@ -479,14 +487,14 @@ const styles = `
 
   .card-hint {
     position: absolute;
-    bottom: 1.5rem;
-    font-size: 0.875rem;
+    bottom: var(--space-lg);
+    font-size: var(--font-size-sm);
     color: var(--text-muted);
   }
 
   .response-buttons {
     display: flex;
-    gap: 1rem;
+    gap: var(--space-md);
     justify-content: center;
     max-width: 400px;
     margin: 0 auto;
@@ -494,15 +502,16 @@ const styles = `
 
   .response-btn {
     flex: 1;
+    animation: feedback-flash 0.3s ease;
   }
 
   .response-key {
     display: inline-block;
-    padding: 0.125rem 0.375rem;
+    padding: var(--space-xs) var(--space-sm);
     background: rgba(255,255,255,0.2);
-    border-radius: 4px;
-    font-size: 0.75rem;
-    margin: 0 0.25rem;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    margin: 0 var(--space-xs);
   }
 
   .skip-hint {
@@ -512,17 +521,18 @@ const styles = `
   .group-selection {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 0.75rem;
+    gap: var(--space-md);
     max-width: 800px;
-    margin: 0 auto 2rem;
+    margin: 0 auto var(--space-xl);
   }
 
   .group-btn {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
-    padding: 1rem;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    min-height: var(--touch-large);
     background: var(--bg-secondary);
     border: 2px solid var(--border);
     border-radius: var(--radius-md);
@@ -531,13 +541,20 @@ const styles = `
   }
 
   .group-btn:hover {
-    border-color: var(--primary-light);
+    border-color: var(--feedback-focus);
     background: var(--bg-tertiary);
+    transform: scale(1.02);
+  }
+
+  .group-btn:focus-visible {
+    outline: 2px solid var(--feedback-focus);
+    outline-offset: 2px;
   }
 
   .group-btn.active {
     border-color: var(--primary);
-    background: rgba(99, 102, 241, 0.1);
+    background: rgba(79, 70, 229, 0.1);
+    animation: pulse-success 0.3s ease;
   }
 
   .group-btn.weak {
@@ -550,14 +567,14 @@ const styles = `
   }
 
   .group-chars {
-    font-size: 1.25rem;
+    font-size: var(--font-size-xl);
     font-weight: 600;
     color: var(--text-primary);
     letter-spacing: 0.1em;
   }
 
   .group-name {
-    font-size: 0.75rem;
+    font-size: var(--font-size-sm);
     color: var(--text-muted);
   }
 
@@ -567,73 +584,83 @@ const styles = `
 
   .session-complete {
     text-align: center;
-    padding: 3rem 1rem;
+    padding: var(--space-2xl) var(--space-md);
+    animation: fadeIn 0.4s ease;
   }
 
   .complete-icon {
-    font-size: 4rem;
-    margin-bottom: 1rem;
+    font-size: 64px;
+    margin-bottom: var(--space-md);
   }
 
   .complete-subtitle {
     color: var(--text-muted);
-    margin-bottom: 2rem;
+    margin-bottom: var(--space-xl);
+    font-size: var(--font-size-lg);
   }
 
   .complete-stats {
     display: flex;
     justify-content: center;
-    gap: 3rem;
-    margin-bottom: 2rem;
+    gap: var(--space-2xl);
+    margin-bottom: var(--space-xl);
   }
 
   .complete-stat {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: var(--space-sm);
   }
 
   .complete-stat-value {
-    font-size: 2.5rem;
+    font-size: 40px;
     font-weight: 700;
     color: var(--text-primary);
   }
 
   .complete-stat-value.success {
-    color: var(--success);
+    color: var(--feedback-correct);
   }
 
   .complete-stat-value.error {
-    color: var(--error);
+    color: var(--feedback-incorrect);
   }
 
   .complete-stat-label {
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
     color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
   .complete-actions {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: var(--space-md);
     align-items: center;
   }
 
   @media (max-width: 640px) {
     .group-selection {
       grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-md);
     }
 
     .response-buttons {
       flex-direction: column;
+      gap: var(--space-md);
     }
 
     .complete-stats {
-      gap: 1.5rem;
+      gap: var(--space-lg);
     }
 
     .complete-stat-value {
-      font-size: 2rem;
+      font-size: var(--font-size-3xl);
+    }
+
+    .container {
+      padding: 0 var(--space-md);
     }
   }
 `;
