@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { hiragana, shuffle, groups, yoonGroups, allGroups } from '../data/hiragana';
 
-export default function Flashcards({ recordAttempt, updateStreak, getMastery }) {
+export default function Flashcards({ recordAttempt, updateStreak, getMastery, getWeakCharacters }) {
   const [deck, setDeck] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -41,11 +41,22 @@ export default function Flashcards({ recordAttempt, updateStreak, getMastery }) 
       cards = [...hiragana];
     } else if (selectedGroups.includes('main')) {
       cards = hiragana.filter(h => h.type !== 'yoon');
+    } else if (selectedGroups.includes('weak')) {
+      const weakChars = getWeakCharacters(70);
+      cards = hiragana.filter(h => weakChars.includes(h.char));
+      if (cards.length === 0) {
+        // If no weak characters, show all unpracticed
+        const practiced = new Set(Object.keys(JSON.parse(localStorage.getItem('hiragana-master-progress') || '{}')?.characters || {}));
+        cards = hiragana.filter(h => !practiced.has(h.char)).slice(0, 20);
+        if (cards.length === 0) {
+          cards = [...hiragana]; // Fallback to all
+        }
+      }
     } else {
       cards = hiragana.filter(h => selectedGroups.includes(h.group));
     }
     return shuffle(cards);
-  }, [selectedGroups]);
+  }, [selectedGroups, getWeakCharacters]);
 
   const startSession = () => {
     const newDeck = buildDeck();
@@ -81,11 +92,11 @@ export default function Flashcards({ recordAttempt, updateStreak, getMastery }) 
   };
 
   const toggleGroup = (groupId) => {
-    if (groupId === 'all' || groupId === 'main') {
+    if (groupId === 'all' || groupId === 'main' || groupId === 'weak') {
       setSelectedGroups([groupId]);
     } else {
       setSelectedGroups(prev => {
-        const filtered = prev.filter(g => g !== 'all' && g !== 'main');
+        const filtered = prev.filter(g => g !== 'all' && g !== 'main' && g !== 'weak');
         if (filtered.includes(groupId)) {
           const result = filtered.filter(g => g !== groupId);
           return result.length === 0 ? ['all'] : result;
@@ -168,6 +179,14 @@ export default function Flashcards({ recordAttempt, updateStreak, getMastery }) 
               <span className="group-name">76 (no yōon)</span>
             </button>
             
+            <button
+              className={`group-btn weak ${selectedGroups.includes('weak') ? 'active' : ''}`}
+              onClick={() => toggleGroup('weak')}
+            >
+              <span className="group-chars">🎯</span>
+              <span className="group-name">Weak Characters</span>
+            </button>
+            
             {allGroups.map(group => (
               <button
                 key={group.id}
@@ -185,8 +204,9 @@ export default function Flashcards({ recordAttempt, updateStreak, getMastery }) 
               Start Practice ({
                 selectedGroups.includes('all') ? 109 : 
                 selectedGroups.includes('main') ? 76 :
+                selectedGroups.includes('weak') ? 'Focus' :
                 hiragana.filter(h => selectedGroups.includes(h.group)).length
-              } cards)
+              } {selectedGroups.includes('weak') ? 'Mode' : 'cards'})
             </button>
           </div>
         </div>
@@ -335,6 +355,15 @@ const styles = `
   .group-btn.active {
     border-color: var(--primary);
     background: rgba(99, 102, 241, 0.1);
+  }
+
+  .group-btn.weak {
+    border-color: var(--warning);
+  }
+
+  .group-btn.weak.active {
+    background: rgba(245, 158, 11, 0.1);
+    border-color: var(--warning);
   }
 
   .group-chars {

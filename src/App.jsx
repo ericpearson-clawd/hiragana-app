@@ -56,6 +56,7 @@ function App() {
                   recordAttempt={recordAttempt}
                   updateStreak={updateStreak}
                   getMastery={getMastery}
+                  getWeakCharacters={getWeakCharacters}
                 />
               } 
             />
