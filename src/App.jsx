@@ -1,27 +1,44 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
-import Home from './pages/Home';
-import Flashcards from './pages/Flashcards';
-import Quiz from './pages/Quiz';
-import Progress from './pages/Progress';
-import Settings from './pages/Settings';
 import { useProgress } from './hooks/useProgress';
+import { useAchievements } from './hooks/useAchievements';
+import AchievementUnlocked from './components/AchievementUnlocked';
+import ErrorBoundary from './components/ErrorBoundary';
+import SkeletonLoader from './components/SkeletonLoader';
 import './index.css';
+
+// Lazy load pages for code splitting
+const Home = lazy(() => import('./pages/Home'));
+const Flashcards = lazy(() => import('./pages/Flashcards'));
+const Quiz = lazy(() => import('./pages/Quiz'));
+const Progress = lazy(() => import('./pages/Progress'));
+const Achievements = lazy(() => import('./pages/Achievements'));
+const Settings = lazy(() => import('./pages/Settings'));
 
 function App() {
   const {
     progress,
     updateStreak,
     recordAttempt,
+    recordPerfectSession,
     getMastery,
     getOverallMastery,
     getWeakCharacters,
     getUnpracticedCount,
     toggleDarkMode,
     toggleAutoPlayAudio,
+    toggleReviewNotifications,
+    toggleScript,
     resetProgress,
   } = useProgress();
+
+  const {
+    newlyUnlocked,
+    dismissNewAchievement,
+    getUnlockedCount,
+    getTotalCount,
+  } = useAchievements(progress, getMastery);
 
   // Apply dark mode
   useEffect(() => {
@@ -32,21 +49,40 @@ function App() {
   }, [progress.settings.darkMode]);
 
   return (
-    <BrowserRouter>
-      <div className="app">
-        <Header 
-          darkMode={progress.settings.darkMode} 
-          onToggleTheme={toggleDarkMode}
-        />
-        <main className="main-content">
-          <Routes>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <div className="app">
+          <Header 
+            darkMode={progress.settings.darkMode} 
+            onToggleTheme={toggleDarkMode}
+            streak={progress.streak}
+            longestStreak={progress.longestStreak}
+            achievementsUnlocked={getUnlockedCount()}
+            achievementsTotal={getTotalCount()}
+            currentScript={progress.currentScript}
+            onToggleScript={toggleScript}
+          />
+          <AchievementUnlocked 
+            achievement={newlyUnlocked}
+            onDismiss={dismissNewAchievement}
+          />
+          <main className="main-content" id="main-content">
+            <Suspense fallback={
+              <div style={{ padding: '2rem' }}>
+                <SkeletonLoader variant="title" width="40%" />
+                <SkeletonLoader variant="card" count={2} />
+              </div>
+            }>
+              <Routes>
             <Route 
               path="/" 
               element={
                 <Home 
                   progress={progress}
+                  getMastery={getMastery}
                   getOverallMastery={getOverallMastery}
                   getUnpracticedCount={getUnpracticedCount}
+                  currentScript={progress.currentScript}
                 />
               } 
             />
@@ -55,10 +91,12 @@ function App() {
               element={
                 <Flashcards 
                   recordAttempt={recordAttempt}
+                  recordPerfectSession={recordPerfectSession}
                   updateStreak={updateStreak}
                   getMastery={getMastery}
                   getWeakCharacters={getWeakCharacters}
                   autoPlayAudio={progress.settings.autoPlayAudio}
+                  currentScript={progress.currentScript}
                 />
               } 
             />
@@ -68,6 +106,7 @@ function App() {
                 <Quiz 
                   recordAttempt={recordAttempt}
                   updateStreak={updateStreak}
+                  currentScript={progress.currentScript}
                 />
               } 
             />
@@ -78,8 +117,13 @@ function App() {
                   progress={progress}
                   getMastery={getMastery}
                   getOverallMastery={getOverallMastery}
+                  currentScript={progress.currentScript}
                 />
               } 
+            />
+            <Route 
+              path="/achievements" 
+              element={<Achievements />} 
             />
             <Route 
               path="/settings" 
@@ -88,15 +132,17 @@ function App() {
                   progress={progress}
                   toggleDarkMode={toggleDarkMode}
                   toggleAutoPlayAudio={toggleAutoPlayAudio}
+                  toggleReviewNotifications={toggleReviewNotifications}
                   resetProgress={resetProgress}
                 />
               } 
             />
-          </Routes>
-        </main>
-      </div>
+            </Routes>
+            </Suspense>
+          </main>
+        </div>
 
-      <style>{`
+        <style>{`
         .app {
           min-height: 100vh;
           display: flex;
@@ -113,8 +159,9 @@ function App() {
             padding-bottom: 2rem;
           }
         }
-      `}</style>
-    </BrowserRouter>
+        `}</style>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 

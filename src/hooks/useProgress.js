@@ -1,16 +1,21 @@
 import { useState, useEffect, useCallback } from 'react';
+import { calculateNextReview, initializeSRS } from '../utils/spacedRepetition';
 
 const STORAGE_KEY = 'hiragana-master-progress';
 
 const initialProgress = {
   streak: 0,
+  longestStreak: 0,
   lastPracticeDate: null,
   totalSessions: 0,
+  perfectSessions: 0,
   characters: {},
+  currentScript: 'hiragana', // 'hiragana' or 'katakana'
   settings: {
     darkMode: false,
     soundEnabled: true,
     autoPlayAudio: false,
+    reviewNotifications: true,
   }
 };
 
@@ -53,31 +58,56 @@ export function useProgress() {
         newStreak = 1; // Reset streak
       }
       
+      const newLongestStreak = Math.max(prev.longestStreak || 0, newStreak);
+      
       return {
         ...prev,
         streak: newStreak,
+        longestStreak: newLongestStreak,
         lastPracticeDate: today,
         totalSessions: prev.totalSessions + 1,
       };
     });
   }, []);
 
-  // Record a character attempt
+  // Record a character attempt with SRS integration
   const recordAttempt = useCallback((char, correct) => {
     setProgress(prev => {
-      const charStats = prev.characters[char] || { correct: 0, incorrect: 0, lastSeen: null };
+      const charStats = prev.characters[char] || initializeSRS(char);
+      
+      // Calculate next review using SRS algorithm
+      const { newLevel, nextReview, levelName } = calculateNextReview(
+        charStats.srsLevel || 0,
+        correct,
+        Date.now()
+      );
+      
       return {
         ...prev,
         characters: {
           ...prev.characters,
           [char]: {
+            ...charStats,
             correct: charStats.correct + (correct ? 1 : 0),
             incorrect: charStats.incorrect + (correct ? 0 : 1),
             lastSeen: Date.now(),
+            lastReview: Date.now(),
+            srsLevel: newLevel,
+            nextReview: nextReview,
+            levelName: levelName,
+            reviewCount: (charStats.reviewCount || 0) + 1,
           }
         }
       };
     });
+  }, []);
+
+  // Record a perfect session (100% accuracy)
+  const recordPerfectSession = useCallback(() => {
+    setProgress(prev => ({
+      ...prev,
+      perfectSessions: (prev.perfectSessions || 0) + 1,
+    }));
   }, []);
 
   // Get mastery percentage for a character (0-100)
@@ -135,21 +165,43 @@ export function useProgress() {
     }));
   }, []);
 
+  // Toggle review notifications
+  const toggleReviewNotifications = useCallback(() => {
+    setProgress(prev => ({
+      ...prev,
+      settings: {
+        ...prev.settings,
+        reviewNotifications: !prev.settings.reviewNotifications,
+      }
+    }));
+  }, []);
+
   // Reset all progress
   const resetProgress = useCallback(() => {
     setProgress(initialProgress);
+  }, []);
+
+  // Toggle between hiragana and katakana
+  const toggleScript = useCallback(() => {
+    setProgress(prev => ({
+      ...prev,
+      currentScript: prev.currentScript === 'hiragana' ? 'katakana' : 'hiragana',
+    }));
   }, []);
 
   return {
     progress,
     updateStreak,
     recordAttempt,
+    recordPerfectSession,
     getMastery,
     getOverallMastery,
     getWeakCharacters,
     getUnpracticedCount,
     toggleDarkMode,
     toggleAutoPlayAudio,
+    toggleReviewNotifications,
+    toggleScript,
     resetProgress,
   };
 }

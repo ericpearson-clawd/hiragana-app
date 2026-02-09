@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export default function Settings({ progress, toggleDarkMode, toggleAutoPlayAudio, resetProgress }) {
+export default function Settings({ progress, toggleDarkMode, toggleAutoPlayAudio, toggleReviewNotifications, resetProgress }) {
   const [showConfirm, setShowConfirm] = useState(false);
 
   const handleReset = () => {
@@ -40,6 +40,20 @@ export default function Settings({ progress, toggleDarkMode, toggleAutoPlayAudio
               className={`toggle-switch ${progress.settings.autoPlayAudio ? 'active' : ''}`}
               onClick={toggleAutoPlayAudio}
               aria-label="Toggle auto-play audio"
+            >
+              <span className="toggle-knob"></span>
+            </button>
+          </div>
+
+          <div className="setting-item">
+            <div className="setting-info">
+              <h3>Review Notifications 🔔</h3>
+              <p>Get notified when characters are ready for review</p>
+            </div>
+            <button 
+              className={`toggle-switch ${progress.settings.reviewNotifications ? 'active' : ''}`}
+              onClick={toggleReviewNotifications}
+              aria-label="Toggle review notifications"
             >
               <span className="toggle-knob"></span>
             </button>

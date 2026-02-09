@@ -1,9 +1,13 @@
 import { useState, useCallback, useEffect } from 'react';
 import confetti from 'canvas-confetti';
-import { hiragana, shuffle } from '../data/hiragana';
+import { hiragana, shuffle as shuffleHiragana } from '../data/hiragana';
+import { katakana, shuffle as shuffleKatakana } from '../data/katakana';
 import { playHiragana, stopAudio } from '../utils/audio';
+import { playSuccessChime, playPerfectChime } from '../utils/celebrationSounds';
+import { triggerHaptic } from '../utils/haptics';
+import SparkleAnimation from '../components/SparkleAnimation';
 
-export default function Quiz({ recordAttempt, updateStreak }) {
+export default function Quiz({ recordAttempt, updateStreak, currentScript = 'hiragana' }) {
   const [quizMode, setQuizMode] = useState(null); // 'reading' or 'recognition'
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -12,6 +16,7 @@ export default function Quiz({ recordAttempt, updateStreak }) {
   const [sessionStats, setSessionStats] = useState({ correct: 0, incorrect: 0 });
   const [streak, setStreak] = useState(0);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [showSparkles, setShowSparkles] = useState(false);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -37,31 +42,33 @@ export default function Quiz({ recordAttempt, updateStreak }) {
   }, [quizMode, showResult, currentIndex, questions]);
 
   const generateQuestions = useCallback((mode) => {
-    const shuffled = shuffle([...hiragana]);
+    const characters = currentScript === 'hiragana' ? hiragana : katakana;
+    const shuffleFn = currentScript === 'hiragana' ? shuffleHiragana : shuffleKatakana;
+    const shuffled = shuffleFn([...characters]);
     const selected = shuffled.slice(0, 20); // 20 questions per quiz
     
     return selected.map(item => {
       // Get 3 wrong answers
-      const others = hiragana.filter(h => h.romaji !== item.romaji);
-      const wrongAnswers = shuffle(others).slice(0, 3);
+      const others = characters.filter(h => h.romaji !== item.romaji);
+      const wrongAnswers = shuffleFn(others).slice(0, 3);
       
       if (mode === 'reading') {
-        // Show hiragana, pick romaji
-        const options = shuffle([
+        // Show character, pick romaji
+        const options = shuffleFn([
           { value: item.romaji, correct: true },
           ...wrongAnswers.map(w => ({ value: w.romaji, correct: false }))
         ]);
-        return { display: item.char, displayType: 'hiragana', options, char: item.char };
+        return { display: item.char, displayType: currentScript, options, char: item.char };
       } else {
-        // Show romaji, pick hiragana
-        const options = shuffle([
+        // Show romaji, pick character
+        const options = shuffleFn([
           { value: item.char, correct: true },
           ...wrongAnswers.map(w => ({ value: w.char, correct: false }))
         ]);
         return { display: item.romaji, displayType: 'romaji', options, char: item.char };
       }
     });
-  }, []);
+  }, [currentScript]);
 
   const startQuiz = (mode) => {
     setQuizMode(mode);
@@ -77,7 +84,8 @@ export default function Quiz({ recordAttempt, updateStreak }) {
     // Play audio for first question if in reading mode
     if (mode === 'reading' && newQuestions[0]) {
       setTimeout(() => {
-        const item = hiragana.find(h => h.char === newQuestions[0].char);
+        const characters = currentScript === 'hiragana' ? hiragana : katakana;
+        const item = characters.find(h => h.char === newQuestions[0].char);
         if (item) playHiragana(item.char, item.romaji);
       }, 300);
     }
@@ -95,9 +103,14 @@ export default function Quiz({ recordAttempt, updateStreak }) {
     if (option.correct) {
       setSessionStats(prev => ({ ...prev, correct: prev.correct + 1 }));
       setStreak(prev => prev + 1);
+      // Trigger success celebration
+      setShowSparkles(true);
+      playSuccessChime();
+      triggerHaptic('CORRECT', true); // Haptic feedback for correct answer
     } else {
       setSessionStats(prev => ({ ...prev, incorrect: prev.incorrect + 1 }));
       setStreak(0);
+      triggerHaptic('INCORRECT', true); // Haptic feedback for wrong answer
     }
   };
 
@@ -111,7 +124,8 @@ export default function Quiz({ recordAttempt, updateStreak }) {
       // Play audio for next question if in reading mode
       if (quizMode === 'reading' && questions[nextIdx]) {
         setTimeout(() => {
-          const item = hiragana.find(h => h.char === questions[nextIdx].char);
+          const characters = currentScript === 'hiragana' ? hiragana : katakana;
+          const item = characters.find(h => h.char === questions[nextIdx].char);
           if (item) playHiragana(item.char, item.romaji);
         }, 300);
       }
@@ -126,6 +140,17 @@ export default function Quiz({ recordAttempt, updateStreak }) {
           origin: { y: 0.6 }
         });
       }
+      // Perfect score celebration
+      if (accuracy === 100) {
+        playPerfectChime();
+        setTimeout(() => {
+          confetti({
+            particleCount: 150,
+            spread: 100,
+            origin: { y: 0.5 }
+          });
+        }, 300);
+      }
       setQuizMode('complete');
       stopAudio();
     }
@@ -138,6 +163,7 @@ export default function Quiz({ recordAttempt, updateStreak }) {
   if (quizMode === 'complete') {
     const total = sessionStats.correct + sessionStats.incorrect;
     const accuracy = Math.round((sessionStats.correct / total) * 100);
+    const isPerfect = accuracy === 100;
     
     let grade = 'F';
     let gradeColor = 'var(--error)';
@@ -151,6 +177,12 @@ export default function Quiz({ recordAttempt, updateStreak }) {
       <div className="page">
         <div className="container">
           <div className="quiz-complete animate-fade-in">
+            {isPerfect && (
+              <div className="perfect-badge animate-bounce">
+                <span className="perfect-icon">🏆</span>
+                <span className="perfect-text">PERFECT!</span>
+              </div>
+            )}
             <div className="complete-grade" style={{ color: gradeColor }}>{grade}</div>
             <h2>Quiz Complete!</h2>
             <p className="complete-subtitle">You answered {total} questions</p>
@@ -193,34 +225,34 @@ export default function Quiz({ recordAttempt, updateStreak }) {
         <div className="container">
           <div className="page-header text-center">
             <h1 className="page-title">Quiz Mode</h1>
-            <p className="page-subtitle">Test your hiragana knowledge</p>
+            <p className="page-subtitle">Test your {currentScript} knowledge</p>
           </div>
 
           <div className="mode-selection animate-fade-in">
             <button className="mode-card" onClick={() => startQuiz('reading')}>
-              <div className="mode-icon jp">あ</div>
+              <div className="mode-icon jp">{currentScript === 'hiragana' ? 'あ' : 'ア'}</div>
               <div className="mode-arrow">→</div>
               <div className="mode-icon">a</div>
               <div className="mode-info">
                 <h3>Reading Mode</h3>
-                <p>See hiragana, pick the romaji</p>
+                <p>See {currentScript}, pick the romaji</p>
               </div>
             </button>
             
             <button className="mode-card" onClick={() => startQuiz('recognition')}>
               <div className="mode-icon">ka</div>
               <div className="mode-arrow">→</div>
-              <div className="mode-icon jp">か</div>
+              <div className="mode-icon jp">{currentScript === 'hiragana' ? 'か' : 'カ'}</div>
               <div className="mode-info">
                 <h3>Recognition Mode</h3>
-                <p>See romaji, pick the hiragana</p>
+                <p>See romaji, pick the {currentScript}</p>
               </div>
             </button>
           </div>
 
           <div className="quiz-info">
             <p>📝 20 questions per quiz</p>
-            <p>🎯 All 109 hiragana characters</p>
+            <p>🎯 All 109 {currentScript} characters</p>
           </div>
         </div>
         <style>{styles}</style>
@@ -242,16 +274,18 @@ export default function Quiz({ recordAttempt, updateStreak }) {
           </div>
         </div>
 
-        <div className="quiz-question animate-fade-in">
+        <div className="quiz-question animate-fade-in" style={{ position: 'relative' }}>
+          <SparkleAnimation trigger={showSparkles} onComplete={() => setShowSparkles(false)} />
           <div className="question-with-audio">
-            <div className={`question-display ${currentQuestion?.displayType === 'hiragana' ? 'jp' : ''}`}>
+            <div className={`question-display ${currentQuestion?.displayType !== 'romaji' ? 'jp' : ''}`}>
               {currentQuestion?.display}
             </div>
             <button
               className={`quiz-audio-btn ${isAudioPlaying ? 'playing' : ''}`}
               onClick={() => {
                 if (currentQuestion) {
-                  const item = hiragana.find(h => h.char === currentQuestion.char);
+                  const characters = currentScript === 'hiragana' ? hiragana : katakana;
+                  const item = characters.find(h => h.char === currentQuestion.char);
                   if (item) {
                     playHiragana(
                       item.char, 
@@ -268,7 +302,7 @@ export default function Quiz({ recordAttempt, updateStreak }) {
             </button>
           </div>
           <p className="question-prompt">
-            {quizMode === 'reading' ? 'What is the romaji?' : 'Which hiragana is this?'}
+            {quizMode === 'reading' ? 'What is the romaji?' : `Which ${currentScript} is this?`}
           </p>
         </div>
 
@@ -276,7 +310,7 @@ export default function Quiz({ recordAttempt, updateStreak }) {
           {currentQuestion?.options.map((option, index) => (
             <button
               key={index}
-              className={`quiz-option ${currentQuestion?.displayType === 'hiragana' ? '' : 'jp'} 
+              className={`quiz-option ${currentQuestion?.displayType === 'romaji' ? 'jp' : ''} 
                 ${showResult && option.correct ? 'correct' : ''}
                 ${showResult && selectedAnswer === option && !option.correct ? 'incorrect' : ''}
                 ${showResult && selectedAnswer !== option ? 'disabled' : ''}`}
@@ -581,6 +615,45 @@ const styles = `
     flex-direction: column;
     gap: 1rem;
     align-items: center;
+  }
+
+  .perfect-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    padding: 0.75rem 1.5rem;
+    border-radius: 24px;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 16px rgba(255, 215, 0, 0.4);
+    margin-bottom: 1rem;
+  }
+
+  .perfect-icon {
+    font-size: 1.5rem;
+    animation: perfectSpin 2s ease-in-out infinite;
+  }
+
+  @keyframes perfectSpin {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-15deg); }
+    75% { transform: rotate(15deg); }
+  }
+
+  .perfect-text {
+    letter-spacing: 0.1em;
+  }
+
+  @keyframes animate-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .animate-bounce {
+    animation: animate-bounce 1s ease-in-out 3;
   }
 
   @media (max-width: 640px) {

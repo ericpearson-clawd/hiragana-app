@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 
-export default function Header({ darkMode, onToggleTheme }) {
+export default function Header({ darkMode, onToggleTheme, streak = 0, longestStreak = 0, achievementsUnlocked = 0, achievementsTotal = 8, currentScript = 'hiragana', onToggleScript }) {
   const location = useLocation();
   
   const navItems = [
@@ -8,26 +8,55 @@ export default function Header({ darkMode, onToggleTheme }) {
     { path: '/flashcards', label: 'Flashcards', icon: '🎴' },
     { path: '/quiz', label: 'Quiz', icon: '❓' },
     { path: '/progress', label: 'Progress', icon: '📊' },
+    { path: '/achievements', label: 'Achievements', icon: '🏆', badge: achievementsUnlocked > 0 ? achievementsUnlocked : null },
     { path: '/settings', label: 'Settings', icon: '⚙️' },
   ];
 
   return (
-    <header className="header">
+    <header className="header" role="banner">
       <div className="container">
         <div className="header-content">
-          <Link to="/" className="logo">
-            <span className="logo-icon">あ</span>
+          <Link to="/" className="logo" aria-label="Hiragana Master - Go to home page">
+            <span className="logo-icon" aria-hidden="true">あ</span>
             <span className="logo-text">Hiragana Master</span>
           </Link>
           
-          <nav className="nav">
+          {streak > 0 && (
+            <div 
+              className="streak-badge" 
+              title={`Current streak: ${streak} days. Longest streak: ${longestStreak} days`}
+              aria-label={`Current streak: ${streak} days`}
+            >
+              <span className="streak-flame" aria-hidden="true">🔥</span>
+              <span className="streak-count">{streak}</span>
+            </div>
+          )}
+          
+          {onToggleScript && (
+            <button 
+              className="btn btn-script-toggle"
+              onClick={onToggleScript}
+              aria-label={`Switch to ${currentScript === 'hiragana' ? 'katakana' : 'hiragana'}`}
+              title={`Current: ${currentScript === 'hiragana' ? 'Hiragana' : 'Katakana'}`}
+            >
+              <span className="script-label">{currentScript === 'hiragana' ? 'あ' : 'ア'}</span>
+              <span className="script-name">{currentScript === 'hiragana' ? 'Hiragana' : 'Katakana'}</span>
+            </button>
+          )}
+          
+          <nav className="nav" role="navigation" aria-label="Main navigation">
             {navItems.map(item => (
               <Link
                 key={item.path}
                 to={item.path}
                 className={`nav-link ${location.pathname === item.path ? 'active' : ''}`}
+                aria-label={`${item.label}${item.badge ? ` (${item.badge} unlocked)` : ''}`}
+                aria-current={location.pathname === item.path ? 'page' : undefined}
               >
-                <span className="nav-icon">{item.icon}</span>
+                <span className="nav-icon-wrapper">
+                  <span className="nav-icon" aria-hidden="true">{item.icon}</span>
+                  {item.badge && <span className="nav-badge" aria-label={`${item.badge} new`}>{item.badge}</span>}
+                </span>
                 <span className="nav-label">{item.label}</span>
               </Link>
             ))}
@@ -36,9 +65,10 @@ export default function Header({ darkMode, onToggleTheme }) {
           <button 
             className="btn btn-icon btn-ghost theme-toggle"
             onClick={onToggleTheme}
-            aria-label="Toggle theme"
+            aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            aria-pressed={darkMode}
           >
-            {darkMode ? '☀️' : '🌙'}
+            <span aria-hidden="true">{darkMode ? '☀️' : '🌙'}</span>
           </button>
         </div>
       </div>
@@ -107,12 +137,100 @@ export default function Header({ darkMode, onToggleTheme }) {
           color: white;
         }
         
+        .nav-icon-wrapper {
+          position: relative;
+          display: inline-flex;
+        }
+        
         .nav-icon {
           font-size: 1.25rem;
         }
         
+        .nav-badge {
+          position: absolute;
+          top: -6px;
+          right: -8px;
+          background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+          color: white;
+          font-size: 0.625rem;
+          font-weight: 700;
+          padding: 0.125rem 0.375rem;
+          border-radius: 10px;
+          min-width: 16px;
+          text-align: center;
+          box-shadow: 0 2px 6px rgba(255, 215, 0, 0.4);
+        }
+        
         .theme-toggle {
           font-size: 1.25rem;
+        }
+        
+        .streak-badge {
+          display: flex;
+          align-items: center;
+          gap: 0.375rem;
+          background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+          padding: 0.375rem 0.75rem;
+          border-radius: 20px;
+          font-weight: 700;
+          color: white;
+          font-size: 0.875rem;
+          box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+          animation: streakPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes streakPulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
+        
+        .streak-flame {
+          font-size: 1.125rem;
+          animation: flameFlicker 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes flameFlicker {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.8; }
+        }
+        
+        .streak-count {
+          font-size: 1rem;
+          line-height: 1;
+        }
+        
+        .btn-script-toggle {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.5rem 1rem;
+          background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+          color: white;
+          border: none;
+          border-radius: var(--radius-md);
+          font-weight: 600;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+          box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.3);
+        }
+        
+        .btn-script-toggle:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.4);
+        }
+        
+        .btn-script-toggle:active {
+          transform: translateY(0);
+        }
+        
+        .script-label {
+          font-family: var(--font-jp);
+          font-size: 1.5rem;
+          line-height: 1;
+        }
+        
+        .script-name {
+          font-size: 0.875rem;
         }
         
         @media (max-width: 768px) {
@@ -150,6 +268,31 @@ export default function Header({ darkMode, onToggleTheme }) {
           }
           
           .theme-toggle {
+            display: none;
+          }
+          
+          .streak-badge {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+          }
+          
+          .streak-flame {
+            font-size: 1rem;
+          }
+          
+          .streak-count {
+            font-size: 0.875rem;
+          }
+          
+          .btn-script-toggle {
+            padding: 0.375rem 0.75rem;
+          }
+          
+          .script-name {
             display: none;
           }
         }

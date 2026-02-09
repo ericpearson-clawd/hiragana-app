@@ -16,11 +16,13 @@ Deploy instantly to:
 ## Features
 
 ### 🔊 Audio Pronunciation (NEW!)
-- **Web Speech API** integration for Japanese pronunciation
-- Automatic audio playback in quiz mode
-- Click speaker icon (🔊) on flashcards to hear pronunciation
-- Click any character in Progress view to hear it
-- Works offline, no audio files needed
+- **Web Speech API** integration for native Japanese pronunciation
+- **Auto-play mode** - toggle in Settings to hear characters automatically
+- Click speaker icon (🔊) on any flashcard or quiz to hear pronunciation
+- **Visual feedback** - buttons pulse and change color while speaking
+- Works offline, no audio files or API keys needed
+- Supports all 109 hiragana characters
+- Adjustable speech rate (0.8x for clearer learning pace)
 
 ### 📚 Complete Hiragana Set
 - All 46 basic hiragana characters
@@ -55,10 +57,16 @@ Deploy instantly to:
 
 ### 🎨 Modern UI
 - Clean, responsive design
-- Dark mode support
+- **Dark mode** support (toggle in Settings)
 - Mobile-friendly navigation
 - Smooth animations and transitions
 - Japanese fonts for authentic display
+
+### ⚙️ Settings
+- **Dark Mode** - Switch between light/dark themes
+- **Auto-play Audio** - Automatically play pronunciation when revealing flashcards
+- **Progress Stats** - View total sessions, streak, mastery
+- **Reset Progress** - Start fresh if needed
 
 ## Getting Started
 
