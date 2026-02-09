@@ -1,17 +1,20 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
-import Home from './pages/Home';
-import Flashcards from './pages/Flashcards';
-import Quiz from './pages/Quiz';
-import Progress from './pages/Progress';
-import Achievements from './pages/Achievements';
-import Settings from './pages/Settings';
 import { useProgress } from './hooks/useProgress';
 import { useAchievements } from './hooks/useAchievements';
 import AchievementUnlocked from './components/AchievementUnlocked';
 import ErrorBoundary from './components/ErrorBoundary';
+import SkeletonLoader from './components/SkeletonLoader';
 import './index.css';
+
+// Lazy load pages for code splitting
+const Home = lazy(() => import('./pages/Home'));
+const Flashcards = lazy(() => import('./pages/Flashcards'));
+const Quiz = lazy(() => import('./pages/Quiz'));
+const Progress = lazy(() => import('./pages/Progress'));
+const Achievements = lazy(() => import('./pages/Achievements'));
+const Settings = lazy(() => import('./pages/Settings'));
 
 function App() {
   const {
@@ -60,8 +63,14 @@ function App() {
             achievement={newlyUnlocked}
             onDismiss={dismissNewAchievement}
           />
-          <main className="main-content">
-            <Routes>
+          <main className="main-content" id="main-content">
+            <Suspense fallback={
+              <div style={{ padding: '2rem' }}>
+                <SkeletonLoader variant="title" width="40%" />
+                <SkeletonLoader variant="card" count={2} />
+              </div>
+            }>
+              <Routes>
             <Route 
               path="/" 
               element={
@@ -121,7 +130,8 @@ function App() {
                 />
               } 
             />
-          </Routes>
+            </Routes>
+            </Suspense>
           </main>
         </div>
 
