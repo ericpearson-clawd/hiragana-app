@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { hiragana, groups, yoonGroups, TOTAL_ALL } from '../data/hiragana';
+import { hiragana, groups as hiraganaGroups, yoonGroups as hiraganaYoonGroups, TOTAL_ALL } from '../data/hiragana';
+import { katakana, groups as katakanaGroups, yoonGroups as katakanaYoonGroups } from '../data/katakana';
 import { playHiragana } from '../utils/audio';
 import MasteryBadge from '../components/MasteryBadge';
 import AnimatedProgressBar from '../components/AnimatedProgressBar';
 
-export default function Progress({ progress, getMastery, getOverallMastery }) {
+export default function Progress({ progress, getMastery, getOverallMastery, currentScript = 'hiragana' }) {
   const [selectedChar, setSelectedChar] = useState(null);
   const [filter, setFilter] = useState('all'); // all, basic, dakuten, handakuten
 
@@ -18,6 +19,10 @@ export default function Progress({ progress, getMastery, getOverallMastery }) {
     return 'mastered';
   };
 
+  const groups = currentScript === 'hiragana' ? hiraganaGroups : katakanaGroups;
+  const yoonGroups = currentScript === 'hiragana' ? hiraganaYoonGroups : katakanaYoonGroups;
+  const characters = currentScript === 'hiragana' ? hiragana : katakana;
+  
   const filteredGroups = [...groups, ...yoonGroups].filter(g => {
     if (filter === 'all') return true;
     if (filter === 'basic') return !['g', 'z', 'd', 'b', 'p'].includes(g.id) && !g.id.includes('yoon');
@@ -37,7 +42,7 @@ export default function Progress({ progress, getMastery, getOverallMastery }) {
   };
 
   const selectedCharData = selectedChar ? {
-    ...hiragana.find(h => h.char === selectedChar),
+    ...characters.find(h => h.char === selectedChar),
     ...getCharStats(selectedChar),
     mastery: getMastery(selectedChar),
   } : null;
@@ -47,7 +52,7 @@ export default function Progress({ progress, getMastery, getOverallMastery }) {
       <div className="container">
         <div className="page-header">
           <h1 className="page-title">Your Progress</h1>
-          <p className="page-subtitle">Track your hiragana mastery</p>
+          <p className="page-subtitle">Track your {currentScript} mastery</p>
         </div>
 
         <div className="progress-overview animate-fade-in">
@@ -155,7 +160,7 @@ export default function Progress({ progress, getMastery, getOverallMastery }) {
 
         <div className="character-groups animate-slide-up">
           {filteredGroups.map(group => {
-            const groupChars = hiragana.filter(h => h.group === group.id);
+            const groupChars = characters.filter(h => h.group === group.id);
             return (
               <div key={group.id} className="character-group">
                 <h3 className="group-title">{group.name}</h3>
