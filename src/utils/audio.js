@@ -49,7 +49,7 @@ class HiraganaAudio {
   }
 
   // Play pronunciation for a character
-  async play(char, romaji) {
+  async play(char, romaji, onStart, onEnd) {
     await this.init();
     
     // Stop any ongoing speech
@@ -70,12 +70,26 @@ class HiraganaAudio {
         utterance.voice = this.japaneseVoice;
       }
       
+      // Add callbacks for visual feedback
+      utterance.onstart = () => {
+        if (onStart) onStart();
+      };
+      
+      utterance.onend = () => {
+        if (onEnd) onEnd();
+      };
+      
+      utterance.onerror = () => {
+        if (onEnd) onEnd();
+      };
+      
       // Play the audio
       this.synth.speak(utterance);
       
       return true;
     } catch (error) {
       console.error('Audio playback failed:', error);
+      if (onEnd) onEnd();
       return false;
     }
   }
@@ -101,8 +115,8 @@ class HiraganaAudio {
 export const hiraganaAudio = new HiraganaAudio();
 
 // Utility function for easy use in components
-export const playHiragana = (char, romaji) => {
-  return hiraganaAudio.play(char, romaji);
+export const playHiragana = (char, romaji, onStart, onEnd) => {
+  return hiraganaAudio.play(char, romaji, onStart, onEnd);
 };
 
 export const stopAudio = () => {

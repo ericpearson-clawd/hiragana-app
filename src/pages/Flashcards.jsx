@@ -108,7 +108,12 @@ export default function Flashcards({ recordAttempt, updateStreak, getMastery, ge
   const handleFlip = () => {
     if (!flipped && currentCard && autoPlayAudio) {
       // Auto-play audio when revealing the answer (if enabled in settings)
-      playHiragana(currentCard.char, currentCard.romaji);
+      playHiragana(
+        currentCard.char, 
+        currentCard.romaji,
+        () => setIsAudioPlaying(true),
+        () => setIsAudioPlaying(false)
+      );
     }
     setFlipped(!flipped);
   };
@@ -116,7 +121,12 @@ export default function Flashcards({ recordAttempt, updateStreak, getMastery, ge
   const handlePlayAudio = (e) => {
     e.stopPropagation();
     if (currentCard) {
-      playHiragana(currentCard.char, currentCard.romaji);
+      playHiragana(
+        currentCard.char, 
+        currentCard.romaji,
+        () => setIsAudioPlaying(true),
+        () => setIsAudioPlaying(false)
+      );
     }
   };
 
@@ -300,7 +310,7 @@ export default function Flashcards({ recordAttempt, updateStreak, getMastery, ge
               </div>
               <div className="character-card-back">
                 <button 
-                  className="audio-btn"
+                  className={`audio-btn ${isAudioPlaying ? 'playing' : ''}`}
                   onClick={handlePlayAudio}
                   title="Play pronunciation"
                   aria-label="Play audio"
