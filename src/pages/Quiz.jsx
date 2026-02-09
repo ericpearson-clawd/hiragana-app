@@ -11,6 +11,7 @@ export default function Quiz({ recordAttempt, updateStreak }) {
   const [showResult, setShowResult] = useState(false);
   const [sessionStats, setSessionStats] = useState({ correct: 0, incorrect: 0 });
   const [streak, setStreak] = useState(0);
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
 
   // Keyboard shortcuts
   useEffect(() => {

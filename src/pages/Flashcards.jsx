@@ -466,6 +466,17 @@ const styles = `
     transform: scale(0.95);
   }
 
+  .audio-btn.playing {
+    animation: audioPlaying 0.8s ease-in-out infinite;
+    background: var(--primary);
+    border-color: var(--primary);
+  }
+
+  @keyframes audioPlaying {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+  }
+
   .card-hint {
     position: absolute;
     bottom: 1.5rem;
