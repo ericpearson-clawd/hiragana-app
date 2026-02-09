@@ -10,6 +10,7 @@ import Settings from './pages/Settings';
 import { useProgress } from './hooks/useProgress';
 import { useAchievements } from './hooks/useAchievements';
 import AchievementUnlocked from './components/AchievementUnlocked';
+import ErrorBoundary from './components/ErrorBoundary';
 import './index.css';
 
 function App() {
@@ -44,22 +45,23 @@ function App() {
   }, [progress.settings.darkMode]);
 
   return (
-    <BrowserRouter>
-      <div className="app">
-        <Header 
-          darkMode={progress.settings.darkMode} 
-          onToggleTheme={toggleDarkMode}
-          streak={progress.streak}
-          longestStreak={progress.longestStreak}
-          achievementsUnlocked={getUnlockedCount()}
-          achievementsTotal={getTotalCount()}
-        />
-        <AchievementUnlocked 
-          achievement={newlyUnlocked}
-          onDismiss={dismissNewAchievement}
-        />
-        <main className="main-content">
-          <Routes>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <div className="app">
+          <Header 
+            darkMode={progress.settings.darkMode} 
+            onToggleTheme={toggleDarkMode}
+            streak={progress.streak}
+            longestStreak={progress.longestStreak}
+            achievementsUnlocked={getUnlockedCount()}
+            achievementsTotal={getTotalCount()}
+          />
+          <AchievementUnlocked 
+            achievement={newlyUnlocked}
+            onDismiss={dismissNewAchievement}
+          />
+          <main className="main-content">
+            <Routes>
             <Route 
               path="/" 
               element={
@@ -120,10 +122,10 @@ function App() {
               } 
             />
           </Routes>
-        </main>
-      </div>
+          </main>
+        </div>
 
-      <style>{`
+        <style>{`
         .app {
           min-height: 100vh;
           display: flex;
@@ -140,8 +142,9 @@ function App() {
             padding-bottom: 2rem;
           }
         }
-      `}</style>
-    </BrowserRouter>
+        `}</style>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 

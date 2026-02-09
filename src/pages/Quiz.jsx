@@ -3,6 +3,7 @@ import confetti from 'canvas-confetti';
 import { hiragana, shuffle } from '../data/hiragana';
 import { playHiragana, stopAudio } from '../utils/audio';
 import { playSuccessChime, playPerfectChime } from '../utils/celebrationSounds';
+import { triggerHaptic } from '../utils/haptics';
 import SparkleAnimation from '../components/SparkleAnimation';
 
 export default function Quiz({ recordAttempt, updateStreak }) {
@@ -101,9 +102,11 @@ export default function Quiz({ recordAttempt, updateStreak }) {
       // Trigger success celebration
       setShowSparkles(true);
       playSuccessChime();
+      triggerHaptic('CORRECT', true); // Haptic feedback for correct answer
     } else {
       setSessionStats(prev => ({ ...prev, incorrect: prev.incorrect + 1 }));
       setStreak(0);
+      triggerHaptic('INCORRECT', true); // Haptic feedback for wrong answer
     }
   };
 

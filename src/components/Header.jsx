@@ -13,31 +13,37 @@ export default function Header({ darkMode, onToggleTheme, streak = 0, longestStr
   ];
 
   return (
-    <header className="header">
+    <header className="header" role="banner">
       <div className="container">
         <div className="header-content">
-          <Link to="/" className="logo">
-            <span className="logo-icon">あ</span>
+          <Link to="/" className="logo" aria-label="Hiragana Master - Go to home page">
+            <span className="logo-icon" aria-hidden="true">あ</span>
             <span className="logo-text">Hiragana Master</span>
           </Link>
           
           {streak > 0 && (
-            <div className="streak-badge" title={`Longest streak: ${longestStreak} days`}>
-              <span className="streak-flame">🔥</span>
+            <div 
+              className="streak-badge" 
+              title={`Current streak: ${streak} days. Longest streak: ${longestStreak} days`}
+              aria-label={`Current streak: ${streak} days`}
+            >
+              <span className="streak-flame" aria-hidden="true">🔥</span>
               <span className="streak-count">{streak}</span>
             </div>
           )}
           
-          <nav className="nav">
+          <nav className="nav" role="navigation" aria-label="Main navigation">
             {navItems.map(item => (
               <Link
                 key={item.path}
                 to={item.path}
                 className={`nav-link ${location.pathname === item.path ? 'active' : ''}`}
+                aria-label={`${item.label}${item.badge ? ` (${item.badge} unlocked)` : ''}`}
+                aria-current={location.pathname === item.path ? 'page' : undefined}
               >
                 <span className="nav-icon-wrapper">
-                  <span className="nav-icon">{item.icon}</span>
-                  {item.badge && <span className="nav-badge">{item.badge}</span>}
+                  <span className="nav-icon" aria-hidden="true">{item.icon}</span>
+                  {item.badge && <span className="nav-badge" aria-label={`${item.badge} new`}>{item.badge}</span>}
                 </span>
                 <span className="nav-label">{item.label}</span>
               </Link>
@@ -47,9 +53,10 @@ export default function Header({ darkMode, onToggleTheme, streak = 0, longestStr
           <button 
             className="btn btn-icon btn-ghost theme-toggle"
             onClick={onToggleTheme}
-            aria-label="Toggle theme"
+            aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            aria-pressed={darkMode}
           >
-            {darkMode ? '☀️' : '🌙'}
+            <span aria-hidden="true">{darkMode ? '☀️' : '🌙'}</span>
           </button>
         </div>
       </div>
