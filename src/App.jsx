@@ -104,6 +104,7 @@ function App() {
                 <Quiz 
                   recordAttempt={recordAttempt}
                   updateStreak={updateStreak}
+                  currentScript={progress.currentScript}
                 />
               } 
             />
