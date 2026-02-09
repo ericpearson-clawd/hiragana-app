@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import Flashcards from './pages/Flashcards';
 import Quiz from './pages/Quiz';
 import Progress from './pages/Progress';
+import Settings from './pages/Settings';
 import { useProgress } from './hooks/useProgress';
 import './index.css';
 
@@ -74,6 +75,16 @@ function App() {
                   progress={progress}
                   getMastery={getMastery}
                   getOverallMastery={getOverallMastery}
+                />
+              } 
+            />
+            <Route 
+              path="/settings" 
+              element={
+                <Settings 
+                  progress={progress}
+                  toggleDarkMode={toggleDarkMode}
+                  resetProgress={resetProgress}
                 />
               } 
             />

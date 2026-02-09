@@ -8,6 +8,7 @@ export default function Header({ darkMode, onToggleTheme }) {
     { path: '/flashcards', label: 'Flashcards', icon: '🎴' },
     { path: '/quiz', label: 'Quiz', icon: '❓' },
     { path: '/progress', label: 'Progress', icon: '📊' },
+    { path: '/settings', label: 'Settings', icon: '⚙️' },
   ];
 
   return (
