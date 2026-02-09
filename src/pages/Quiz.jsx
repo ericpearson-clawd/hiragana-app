@@ -165,7 +165,7 @@ export default function Quiz({ recordAttempt, updateStreak }) {
 
           <div className="quiz-info">
             <p>📝 20 questions per quiz</p>
-            <p>🎯 All 76 hiragana characters</p>
+            <p>🎯 All 109 hiragana characters</p>
           </div>
         </div>
         <style>{styles}</style>

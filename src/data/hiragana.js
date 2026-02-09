@@ -106,12 +106,78 @@ export const hiragana = [
   { char: "ぷ", romaji: "pu", group: "p", type: "handakuten" },
   { char: "ぺ", romaji: "pe", group: "p", type: "handakuten" },
   { char: "ぽ", romaji: "po", group: "p", type: "handakuten" },
+
+  // === YŌON (combination characters) ===
+  
+  // K-yōon
+  { char: "きゃ", romaji: "kya", group: "k-yoon", type: "yoon" },
+  { char: "きゅ", romaji: "kyu", group: "k-yoon", type: "yoon" },
+  { char: "きょ", romaji: "kyo", group: "k-yoon", type: "yoon" },
+  
+  // S-yōon
+  { char: "しゃ", romaji: "sha", group: "s-yoon", type: "yoon" },
+  { char: "しゅ", romaji: "shu", group: "s-yoon", type: "yoon" },
+  { char: "しょ", romaji: "sho", group: "s-yoon", type: "yoon" },
+  
+  // C-yōon
+  { char: "ちゃ", romaji: "cha", group: "c-yoon", type: "yoon" },
+  { char: "ちゅ", romaji: "chu", group: "c-yoon", type: "yoon" },
+  { char: "ちょ", romaji: "cho", group: "c-yoon", type: "yoon" },
+  
+  // N-yōon
+  { char: "にゃ", romaji: "nya", group: "n-yoon", type: "yoon" },
+  { char: "にゅ", romaji: "nyu", group: "n-yoon", type: "yoon" },
+  { char: "にょ", romaji: "nyo", group: "n-yoon", type: "yoon" },
+  
+  // H-yōon
+  { char: "ひゃ", romaji: "hya", group: "h-yoon", type: "yoon" },
+  { char: "ひゅ", romaji: "hyu", group: "h-yoon", type: "yoon" },
+  { char: "ひょ", romaji: "hyo", group: "h-yoon", type: "yoon" },
+  
+  // M-yōon
+  { char: "みゃ", romaji: "mya", group: "m-yoon", type: "yoon" },
+  { char: "みゅ", romaji: "myu", group: "m-yoon", type: "yoon" },
+  { char: "みょ", romaji: "myo", group: "m-yoon", type: "yoon" },
+  
+  // R-yōon
+  { char: "りゃ", romaji: "rya", group: "r-yoon", type: "yoon" },
+  { char: "りゅ", romaji: "ryu", group: "r-yoon", type: "yoon" },
+  { char: "りょ", romaji: "ryo", group: "r-yoon", type: "yoon" },
+  
+  // G-yōon (voiced)
+  { char: "ぎゃ", romaji: "gya", group: "g-yoon", type: "yoon" },
+  { char: "ぎゅ", romaji: "gyu", group: "g-yoon", type: "yoon" },
+  { char: "ぎょ", romaji: "gyo", group: "g-yoon", type: "yoon" },
+  
+  // J-yōon (voiced)
+  { char: "じゃ", romaji: "ja", group: "j-yoon", type: "yoon" },
+  { char: "じゅ", romaji: "ju", group: "j-yoon", type: "yoon" },
+  { char: "じょ", romaji: "jo", group: "j-yoon", type: "yoon" },
+  
+  // B-yōon (voiced)
+  { char: "びゃ", romaji: "bya", group: "b-yoon", type: "yoon" },
+  { char: "びゅ", romaji: "byu", group: "b-yoon", type: "yoon" },
+  { char: "びょ", romaji: "byo", group: "b-yoon", type: "yoon" },
+  
+  // P-yōon (semi-voiced)
+  { char: "ぴゃ", romaji: "pya", group: "p-yoon", type: "yoon" },
+  { char: "ぴゅ", romaji: "pyu", group: "p-yoon", type: "yoon" },
+  { char: "ぴょ", romaji: "pyo", group: "p-yoon", type: "yoon" },
 ];
 
 // Get characters by type
 export const getBasicHiragana = () => hiragana.filter(h => h.type === "basic");
 export const getDakutenHiragana = () => hiragana.filter(h => h.type === "dakuten");
 export const getHandakutenHiragana = () => hiragana.filter(h => h.type === "handakuten");
+export const getYoonHiragana = () => hiragana.filter(h => h.type === "yoon");
+
+// Get main hiragana (excluding yoon for simpler practice)
+export const getMainHiragana = () => hiragana.filter(h => h.type !== "yoon");
+
+// Total counts
+export const TOTAL_MAIN = 76; // Basic + Dakuten + Handakuten
+export const TOTAL_YOON = 33; // Combination characters
+export const TOTAL_ALL = 109; // Everything
 
 // Get characters by group
 export const getByGroup = (group) => hiragana.filter(h => h.group === group);
@@ -134,6 +200,24 @@ export const groups = [
   { id: "b", name: "B-row (dakuten)", chars: "ばびぶべぼ" },
   { id: "p", name: "P-row (handakuten)", chars: "ぱぴぷぺぽ" },
 ];
+
+// Yoon groups (combination characters)
+export const yoonGroups = [
+  { id: "k-yoon", name: "K-yōon", chars: "きゃきゅきょ" },
+  { id: "s-yoon", name: "S-yōon", chars: "しゃしゅしょ" },
+  { id: "c-yoon", name: "C-yōon", chars: "ちゃちゅちょ" },
+  { id: "n-yoon", name: "N-yōon", chars: "にゃにゅにょ" },
+  { id: "h-yoon", name: "H-yōon", chars: "ひゃひゅひょ" },
+  { id: "m-yoon", name: "M-yōon", chars: "みゃみゅみょ" },
+  { id: "r-yoon", name: "R-yōon", chars: "りゃりゅりょ" },
+  { id: "g-yoon", name: "G-yōon", chars: "ぎゃぎゅぎょ" },
+  { id: "j-yoon", name: "J-yōon", chars: "じゃじゅじょ" },
+  { id: "b-yoon", name: "B-yōon", chars: "びゃびゅびょ" },
+  { id: "p-yoon", name: "P-yōon", chars: "ぴゃぴゅぴょ" },
+];
+
+// All groups combined
+export const allGroups = [...groups, ...yoonGroups];
 
 // Shuffle utility
 export const shuffle = (array) => {

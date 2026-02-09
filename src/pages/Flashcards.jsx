@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { hiragana, shuffle, groups } from '../data/hiragana';
+import { hiragana, shuffle, groups, yoonGroups, allGroups } from '../data/hiragana';
 
 export default function Flashcards({ recordAttempt, updateStreak, getMastery }) {
   const [deck, setDeck] = useState([]);
@@ -14,6 +14,8 @@ export default function Flashcards({ recordAttempt, updateStreak, getMastery }) 
     let cards = [];
     if (selectedGroups.includes('all')) {
       cards = [...hiragana];
+    } else if (selectedGroups.includes('main')) {
+      cards = hiragana.filter(h => h.type !== 'yoon');
     } else {
       cards = hiragana.filter(h => selectedGroups.includes(h.group));
     }
@@ -54,11 +56,11 @@ export default function Flashcards({ recordAttempt, updateStreak, getMastery }) 
   };
 
   const toggleGroup = (groupId) => {
-    if (groupId === 'all') {
-      setSelectedGroups(['all']);
+    if (groupId === 'all' || groupId === 'main') {
+      setSelectedGroups([groupId]);
     } else {
       setSelectedGroups(prev => {
-        const filtered = prev.filter(g => g !== 'all');
+        const filtered = prev.filter(g => g !== 'all' && g !== 'main');
         if (filtered.includes(groupId)) {
           const result = filtered.filter(g => g !== groupId);
           return result.length === 0 ? ['all'] : result;
@@ -130,10 +132,18 @@ export default function Flashcards({ recordAttempt, updateStreak, getMastery }) 
               onClick={() => toggleGroup('all')}
             >
               <span className="group-chars">All</span>
-              <span className="group-name">76 characters</span>
+              <span className="group-name">109 characters</span>
             </button>
             
-            {groups.map(group => (
+            <button
+              className={`group-btn ${selectedGroups.includes('main') ? 'active' : ''}`}
+              onClick={() => toggleGroup('main')}
+            >
+              <span className="group-chars">Main</span>
+              <span className="group-name">76 (no yōon)</span>
+            </button>
+            
+            {allGroups.map(group => (
               <button
                 key={group.id}
                 className={`group-btn ${selectedGroups.includes(group.id) ? 'active' : ''}`}
@@ -147,8 +157,11 @@ export default function Flashcards({ recordAttempt, updateStreak, getMastery }) 
 
           <div className="start-action">
             <button className="btn btn-primary btn-lg" onClick={startSession}>
-              Start Practice ({selectedGroups.includes('all') ? 76 : 
-                hiragana.filter(h => selectedGroups.includes(h.group)).length} cards)
+              Start Practice ({
+                selectedGroups.includes('all') ? 109 : 
+                selectedGroups.includes('main') ? 76 :
+                hiragana.filter(h => selectedGroups.includes(h.group)).length
+              } cards)
             </button>
           </div>
         </div>

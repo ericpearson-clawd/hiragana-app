@@ -13,7 +13,7 @@ export default function Home({ progress, getOverallMastery, getUnpracticedCount 
             Master <span className="gradient-text">Hiragana</span>
           </h1>
           <p className="home-subtitle">
-            Learn all 76 Japanese hiragana characters through interactive flashcards and quizzes
+            Learn all 109 Japanese hiragana characters through interactive flashcards and quizzes
           </p>
         </div>
 
@@ -59,7 +59,7 @@ export default function Home({ progress, getOverallMastery, getUnpracticedCount 
             <div className="action-icon">📊</div>
             <div className="action-content">
               <h3>View Progress</h3>
-              <p>See all {76} characters</p>
+              <p>See all 109 characters</p>
             </div>
             <div className="action-arrow">→</div>
           </Link>
@@ -73,16 +73,16 @@ export default function Home({ progress, getOverallMastery, getUnpracticedCount 
               <span className="info-label">Basic Hiragana</span>
             </div>
             <div className="info-item">
-              <span className="info-count">20</span>
-              <span className="info-label">Dakuten (゛)</span>
+              <span className="info-count">25</span>
+              <span className="info-label">Dakuten/Handakuten</span>
             </div>
             <div className="info-item">
-              <span className="info-count">5</span>
-              <span className="info-label">Handakuten (゜)</span>
+              <span className="info-count">33</span>
+              <span className="info-label">Yōon (Combos)</span>
             </div>
             <div className="info-item">
-              <span className="info-count">5</span>
-              <span className="info-label">Additional</span>
+              <span className="info-count">109</span>
+              <span className="info-label">Total</span>
             </div>
           </div>
         </div>

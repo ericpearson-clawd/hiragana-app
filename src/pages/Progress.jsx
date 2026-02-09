@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { hiragana, groups } from '../data/hiragana';
+import { hiragana, groups, yoonGroups, TOTAL_ALL } from '../data/hiragana';
 
 export default function Progress({ progress, getMastery, getOverallMastery }) {
   const [selectedChar, setSelectedChar] = useState(null);
@@ -15,11 +15,12 @@ export default function Progress({ progress, getMastery, getOverallMastery }) {
     return 'mastered';
   };
 
-  const filteredGroups = groups.filter(g => {
+  const filteredGroups = [...groups, ...yoonGroups].filter(g => {
     if (filter === 'all') return true;
-    if (filter === 'basic') return !['g', 'z', 'd', 'b', 'p'].includes(g.id);
+    if (filter === 'basic') return !['g', 'z', 'd', 'b', 'p'].includes(g.id) && !g.id.includes('yoon');
     if (filter === 'dakuten') return ['g', 'z', 'd', 'b'].includes(g.id);
     if (filter === 'handakuten') return g.id === 'p';
+    if (filter === 'yoon') return g.id.includes('yoon');
     return true;
   });
 
@@ -102,7 +103,7 @@ export default function Progress({ progress, getMastery, getOverallMastery }) {
             className={`filter-tab ${filter === 'all' ? 'active' : ''}`}
             onClick={() => setFilter('all')}
           >
-            All (76)
+            All (109)
           </button>
           <button 
             className={`filter-tab ${filter === 'basic' ? 'active' : ''}`}
@@ -121,6 +122,12 @@ export default function Progress({ progress, getMastery, getOverallMastery }) {
             onClick={() => setFilter('handakuten')}
           >
             Handakuten (5)
+          </button>
+          <button 
+            className={`filter-tab ${filter === 'yoon' ? 'active' : ''}`}
+            onClick={() => setFilter('yoon')}
+          >
+            Yōon (33)
           </button>
         </div>
 

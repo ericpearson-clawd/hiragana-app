@@ -97,7 +97,7 @@ export function useProgress() {
     const chars = Object.keys(progress.characters);
     if (chars.length === 0) return 0;
     const totalMastery = chars.reduce((sum, char) => sum + getMastery(char), 0);
-    return Math.round(totalMastery / 76); // 76 total hiragana
+    return Math.round(totalMastery / 109); // 109 total hiragana including yoon
   }, [progress.characters, getMastery]);
 
   // Get characters that need more practice (low mastery)
@@ -109,7 +109,7 @@ export function useProgress() {
 
   // Get characters never practiced
   const getUnpracticedCount = useCallback(() => {
-    return 76 - Object.keys(progress.characters).length;
+    return 109 - Object.keys(progress.characters).length;
   }, [progress.characters]);
 
   // Toggle dark mode
