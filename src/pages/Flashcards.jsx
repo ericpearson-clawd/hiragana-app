@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import confetti from 'canvas-confetti';
-import { hiragana, shuffle, groups, yoonGroups, allGroups } from '../data/hiragana';
+import { hiragana, shuffle as shuffleHiragana, groups as hiraganaGroups, yoonGroups as hiraganaYoonGroups, allGroups as hiraganaAllGroups } from '../data/hiragana';
+import { katakana, shuffle as shuffleKatakana, groups as katakanaGroups, yoonGroups as katakanaYoonGroups, allGroups as katakanaAllGroups } from '../data/katakana';
 import { getMnemonic } from '../data/mnemonics';
 import { playHiragana, isAudioSupported } from '../utils/audio';
 
-export default function Flashcards({ recordAttempt, recordPerfectSession, updateStreak, getMastery, getWeakCharacters, autoPlayAudio = false }) {
+export default function Flashcards({ recordAttempt, recordPerfectSession, updateStreak, getMastery, getWeakCharacters, autoPlayAudio = false, currentScript = 'hiragana' }) {
   const [deck, setDeck] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -74,27 +75,29 @@ export default function Flashcards({ recordAttempt, recordPerfectSession, update
 
   // Build deck based on selected groups
   const buildDeck = useCallback(() => {
+    const characters = currentScript === 'hiragana' ? hiragana : katakana;
+    const shuffleFn = currentScript === 'hiragana' ? shuffleHiragana : shuffleKatakana;
     let cards = [];
     if (selectedGroups.includes('all')) {
-      cards = [...hiragana];
+      cards = [...characters];
     } else if (selectedGroups.includes('main')) {
-      cards = hiragana.filter(h => h.type !== 'yoon');
+      cards = characters.filter(h => h.type !== 'yoon');
     } else if (selectedGroups.includes('weak')) {
       const weakChars = getWeakCharacters(70);
-      cards = hiragana.filter(h => weakChars.includes(h.char));
+      cards = characters.filter(h => weakChars.includes(h.char));
       if (cards.length === 0) {
         // If no weak characters, show all unpracticed
         const practiced = new Set(Object.keys(JSON.parse(localStorage.getItem('hiragana-master-progress') || '{}')?.characters || {}));
-        cards = hiragana.filter(h => !practiced.has(h.char)).slice(0, 20);
+        cards = characters.filter(h => !practiced.has(h.char)).slice(0, 20);
         if (cards.length === 0) {
-          cards = [...hiragana]; // Fallback to all
+          cards = [...characters]; // Fallback to all
         }
       }
     } else {
-      cards = hiragana.filter(h => selectedGroups.includes(h.group));
+      cards = characters.filter(h => selectedGroups.includes(h.group));
     }
-    return shuffle(cards);
-  }, [selectedGroups, getWeakCharacters]);
+    return shuffleFn(cards);
+  }, [selectedGroups, getWeakCharacters, currentScript]);
 
   const startSession = () => {
     const newDeck = buildDeck();
@@ -236,7 +239,7 @@ export default function Flashcards({ recordAttempt, recordPerfectSession, update
         <div className="container">
           <div className="page-header text-center">
             <h1 className="page-title">Flashcards</h1>
-            <p className="page-subtitle">Select which character groups to practice</p>
+            <p className="page-subtitle">Select which {currentScript} groups to practice</p>
           </div>
 
           <div className="group-selection animate-fade-in">
@@ -264,7 +267,7 @@ export default function Flashcards({ recordAttempt, recordPerfectSession, update
               <span className="group-name">Weak Characters</span>
             </button>
             
-            {allGroups.map(group => (
+            {(currentScript === 'hiragana' ? hiraganaAllGroups : katakanaAllGroups).map(group => (
               <button
                 key={group.id}
                 className={`group-btn ${selectedGroups.includes(group.id) ? 'active' : ''}`}
@@ -282,7 +285,7 @@ export default function Flashcards({ recordAttempt, recordPerfectSession, update
                 selectedGroups.includes('all') ? 109 : 
                 selectedGroups.includes('main') ? 76 :
                 selectedGroups.includes('weak') ? 'Focus' :
-                hiragana.filter(h => selectedGroups.includes(h.group)).length
+                (currentScript === 'hiragana' ? hiragana : katakana).filter(h => selectedGroups.includes(h.group)).length
               } {selectedGroups.includes('weak') ? 'Mode' : 'cards'})
             </button>
           </div>

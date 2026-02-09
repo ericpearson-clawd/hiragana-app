@@ -95,6 +95,7 @@ function App() {
                   getMastery={getMastery}
                   getWeakCharacters={getWeakCharacters}
                   autoPlayAudio={progress.settings.autoPlayAudio}
+                  currentScript={progress.currentScript}
                 />
               } 
             />
