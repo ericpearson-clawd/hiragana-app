@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { calculateNextReview, initializeSRS } from '../utils/spacedRepetition';
 
 const STORAGE_KEY = 'hiragana-master-progress';
 
@@ -13,6 +14,7 @@ const initialProgress = {
     darkMode: false,
     soundEnabled: true,
     autoPlayAudio: false,
+    reviewNotifications: true,
   }
 };
 
@@ -67,18 +69,32 @@ export function useProgress() {
     });
   }, []);
 
-  // Record a character attempt
+  // Record a character attempt with SRS integration
   const recordAttempt = useCallback((char, correct) => {
     setProgress(prev => {
-      const charStats = prev.characters[char] || { correct: 0, incorrect: 0, lastSeen: null };
+      const charStats = prev.characters[char] || initializeSRS(char);
+      
+      // Calculate next review using SRS algorithm
+      const { newLevel, nextReview, levelName } = calculateNextReview(
+        charStats.srsLevel || 0,
+        correct,
+        Date.now()
+      );
+      
       return {
         ...prev,
         characters: {
           ...prev.characters,
           [char]: {
+            ...charStats,
             correct: charStats.correct + (correct ? 1 : 0),
             incorrect: charStats.incorrect + (correct ? 0 : 1),
             lastSeen: Date.now(),
+            lastReview: Date.now(),
+            srsLevel: newLevel,
+            nextReview: nextReview,
+            levelName: levelName,
+            reviewCount: (charStats.reviewCount || 0) + 1,
           }
         }
       };
@@ -148,6 +164,17 @@ export function useProgress() {
     }));
   }, []);
 
+  // Toggle review notifications
+  const toggleReviewNotifications = useCallback(() => {
+    setProgress(prev => ({
+      ...prev,
+      settings: {
+        ...prev.settings,
+        reviewNotifications: !prev.settings.reviewNotifications,
+      }
+    }));
+  }, []);
+
   // Reset all progress
   const resetProgress = useCallback(() => {
     setProgress(initialProgress);
@@ -164,6 +191,7 @@ export function useProgress() {
     getUnpracticedCount,
     toggleDarkMode,
     toggleAutoPlayAudio,
+    toggleReviewNotifications,
     resetProgress,
   };
 }

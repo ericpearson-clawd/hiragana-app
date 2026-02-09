@@ -1,5 +1,8 @@
 import { Link } from 'react-router-dom';
 import AnimatedProgressBar from '../components/AnimatedProgressBar';
+import ReviewSchedule from '../components/ReviewSchedule';
+import WeakCharacters from '../components/WeakCharacters';
+import PracticeRecommendations from '../components/PracticeRecommendations';
 
 export default function Home({ progress, getOverallMastery, getUnpracticedCount, getMastery }) {
   const mastery = getOverallMastery();
@@ -155,6 +158,24 @@ export default function Home({ progress, getOverallMastery, getUnpracticedCount,
             <div className="stat-value">{progress.perfectSessions || 0}</div>
             <div className="stat-label">Perfect Sessions</div>
           </div>
+        </div>
+
+        {/* Practice Recommendations */}
+        <div className="animate-slide-up">
+          <PracticeRecommendations 
+            characters={progress.characters}
+            progress={progress}
+          />
+        </div>
+
+        {/* Review Schedule */}
+        <div className="animate-slide-up">
+          <ReviewSchedule characters={progress.characters} />
+        </div>
+
+        {/* Weak Characters */}
+        <div className="animate-slide-up">
+          <WeakCharacters characters={progress.characters} />
         </div>
 
         <div className="home-actions animate-slide-up">

@@ -24,6 +24,7 @@ function App() {
     getUnpracticedCount,
     toggleDarkMode,
     toggleAutoPlayAudio,
+    toggleReviewNotifications,
     resetProgress,
   } = useProgress();
 
@@ -113,6 +114,7 @@ function App() {
                   progress={progress}
                   toggleDarkMode={toggleDarkMode}
                   toggleAutoPlayAudio={toggleAutoPlayAudio}
+                  toggleReviewNotifications={toggleReviewNotifications}
                   resetProgress={resetProgress}
                 />
               } 
