@@ -248,11 +248,18 @@ export default function Quiz({ recordAttempt, updateStreak }) {
               {currentQuestion?.display}
             </div>
             <button
-              className="quiz-audio-btn"
+              className={`quiz-audio-btn ${isAudioPlaying ? 'playing' : ''}`}
               onClick={() => {
                 if (currentQuestion) {
                   const item = hiragana.find(h => h.char === currentQuestion.char);
-                  if (item) playHiragana(item.char, item.romaji);
+                  if (item) {
+                    playHiragana(
+                      item.char, 
+                      item.romaji,
+                      () => setIsAudioPlaying(true),
+                      () => setIsAudioPlaying(false)
+                    );
+                  }
                 }
               }}
               aria-label="Play pronunciation"
@@ -375,6 +382,16 @@ const styles = `
 
   .quiz-audio-btn:active {
     transform: scale(0.95);
+  }
+
+  .quiz-audio-btn.playing {
+    animation: audioPlaying 0.8s ease-in-out infinite;
+    background: var(--success);
+  }
+
+  @keyframes audioPlaying {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
   }
 
   .audio-btn {
