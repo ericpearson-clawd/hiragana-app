@@ -29,6 +29,7 @@ function App() {
     toggleDarkMode,
     toggleAutoPlayAudio,
     toggleReviewNotifications,
+    toggleScript,
     resetProgress,
   } = useProgress();
 
@@ -58,6 +59,8 @@ function App() {
             longestStreak={progress.longestStreak}
             achievementsUnlocked={getUnlockedCount()}
             achievementsTotal={getTotalCount()}
+            currentScript={progress.currentScript}
+            onToggleScript={toggleScript}
           />
           <AchievementUnlocked 
             achievement={newlyUnlocked}

@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 
-export default function Header({ darkMode, onToggleTheme, streak = 0, longestStreak = 0, achievementsUnlocked = 0, achievementsTotal = 8 }) {
+export default function Header({ darkMode, onToggleTheme, streak = 0, longestStreak = 0, achievementsUnlocked = 0, achievementsTotal = 8, currentScript = 'hiragana', onToggleScript }) {
   const location = useLocation();
   
   const navItems = [
@@ -30,6 +30,18 @@ export default function Header({ darkMode, onToggleTheme, streak = 0, longestStr
               <span className="streak-flame" aria-hidden="true">🔥</span>
               <span className="streak-count">{streak}</span>
             </div>
+          )}
+          
+          {onToggleScript && (
+            <button 
+              className="btn btn-script-toggle"
+              onClick={onToggleScript}
+              aria-label={`Switch to ${currentScript === 'hiragana' ? 'katakana' : 'hiragana'}`}
+              title={`Current: ${currentScript === 'hiragana' ? 'Hiragana' : 'Katakana'}`}
+            >
+              <span className="script-label">{currentScript === 'hiragana' ? 'あ' : 'ア'}</span>
+              <span className="script-name">{currentScript === 'hiragana' ? 'Hiragana' : 'Katakana'}</span>
+            </button>
           )}
           
           <nav className="nav" role="navigation" aria-label="Main navigation">
@@ -187,6 +199,40 @@ export default function Header({ darkMode, onToggleTheme, streak = 0, longestStr
           line-height: 1;
         }
         
+        .btn-script-toggle {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.5rem 1rem;
+          background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+          color: white;
+          border: none;
+          border-radius: var(--radius-md);
+          font-weight: 600;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+          box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.3);
+        }
+        
+        .btn-script-toggle:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.4);
+        }
+        
+        .btn-script-toggle:active {
+          transform: translateY(0);
+        }
+        
+        .script-label {
+          font-family: var(--font-jp);
+          font-size: 1.5rem;
+          line-height: 1;
+        }
+        
+        .script-name {
+          font-size: 0.875rem;
+        }
+        
         @media (max-width: 768px) {
           .nav {
             position: fixed;
@@ -240,6 +286,14 @@ export default function Header({ darkMode, onToggleTheme, streak = 0, longestStr
           
           .streak-count {
             font-size: 0.875rem;
+          }
+          
+          .btn-script-toggle {
+            padding: 0.375rem 0.75rem;
+          }
+          
+          .script-name {
+            display: none;
           }
         }
       `}</style>

@@ -10,6 +10,7 @@ const initialProgress = {
   totalSessions: 0,
   perfectSessions: 0,
   characters: {},
+  currentScript: 'hiragana', // 'hiragana' or 'katakana'
   settings: {
     darkMode: false,
     soundEnabled: true,
@@ -180,6 +181,14 @@ export function useProgress() {
     setProgress(initialProgress);
   }, []);
 
+  // Toggle between hiragana and katakana
+  const toggleScript = useCallback(() => {
+    setProgress(prev => ({
+      ...prev,
+      currentScript: prev.currentScript === 'hiragana' ? 'katakana' : 'hiragana',
+    }));
+  }, []);
+
   return {
     progress,
     updateStreak,
@@ -192,6 +201,7 @@ export function useProgress() {
     toggleDarkMode,
     toggleAutoPlayAudio,
     toggleReviewNotifications,
+    toggleScript,
     resetProgress,
   };
 }
