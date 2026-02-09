@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { hiragana, shuffle } from '../data/hiragana';
-import { playHiragana } from '../utils/audio';
 import { playHiragana, stopAudio } from '../utils/audio';
 
 export default function Quiz({ recordAttempt, updateStreak }) {
@@ -248,8 +247,13 @@ export default function Quiz({ recordAttempt, updateStreak }) {
               {currentQuestion?.display}
             </div>
             <button
-              className="audio-btn"
-              onClick={() => playHiragana(currentQuestion?.char, currentQuestion?.romaji)}
+              className="quiz-audio-btn"
+              onClick={() => {
+                if (currentQuestion) {
+                  const item = hiragana.find(h => h.char === currentQuestion.char);
+                  if (item) playHiragana(item.char, item.romaji);
+                }
+              }}
               aria-label="Play pronunciation"
             >
               🔊
@@ -346,8 +350,30 @@ const styles = `
   .question-display {
     font-size: 5rem;
     font-weight: 600;
-    margin-bottom: 0.5rem;
     color: var(--text-primary);
+  }
+
+  .quiz-audio-btn {
+    width: 3rem;
+    height: 3rem;
+    background: var(--bg-secondary);
+    border: 2px solid var(--primary);
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .quiz-audio-btn:hover {
+    background: var(--primary);
+    transform: scale(1.1);
+  }
+
+  .quiz-audio-btn:active {
+    transform: scale(0.95);
   }
 
   .audio-btn {

@@ -19,6 +19,7 @@ function App() {
     getWeakCharacters,
     getUnpracticedCount,
     toggleDarkMode,
+    toggleAutoPlayAudio,
     resetProgress,
   } = useProgress();
 
@@ -57,6 +58,7 @@ function App() {
                   updateStreak={updateStreak}
                   getMastery={getMastery}
                   getWeakCharacters={getWeakCharacters}
+                  autoPlayAudio={progress.settings.autoPlayAudio}
                 />
               } 
             />
@@ -85,6 +87,7 @@ function App() {
                 <Settings 
                   progress={progress}
                   toggleDarkMode={toggleDarkMode}
+                  toggleAutoPlayAudio={toggleAutoPlayAudio}
                   resetProgress={resetProgress}
                 />
               } 

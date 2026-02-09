@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { hiragana, groups, yoonGroups, TOTAL_ALL } from '../data/hiragana';
+import { playHiragana } from '../utils/audio';
 
 export default function Progress({ progress, getMastery, getOverallMastery }) {
   const [selectedChar, setSelectedChar] = useState(null);
@@ -164,7 +165,10 @@ export default function Progress({ progress, getMastery, getOverallMastery }) {
                       <button
                         key={char.char}
                         className={`mastery-badge ${level} ${selectedChar === char.char ? 'selected' : ''}`}
-                        onClick={() => setSelectedChar(selectedChar === char.char ? null : char.char)}
+                        onClick={() => {
+                          playHiragana(char.char, char.romaji);
+                          setSelectedChar(selectedChar === char.char ? null : char.char);
+                        }}
                       >
                         {char.char}
                       </button>

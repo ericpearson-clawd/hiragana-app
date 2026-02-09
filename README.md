@@ -15,6 +15,13 @@ Deploy instantly to:
 
 ## Features
 
+### 🔊 Audio Pronunciation (NEW!)
+- **Web Speech API** integration for Japanese pronunciation
+- Automatic audio playback in quiz mode
+- Click speaker icon (🔊) on flashcards to hear pronunciation
+- Click any character in Progress view to hear it
+- Works offline, no audio files needed
+
 ### 📚 Complete Hiragana Set
 - All 46 basic hiragana characters
 - 25 dakuten/handakuten (voiced/semi-voiced) characters  

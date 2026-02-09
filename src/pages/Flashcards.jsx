@@ -4,7 +4,7 @@ import { hiragana, shuffle, groups, yoonGroups, allGroups } from '../data/hiraga
 import { getMnemonic } from '../data/mnemonics';
 import { playHiragana, isAudioSupported } from '../utils/audio';
 
-export default function Flashcards({ recordAttempt, updateStreak, getMastery, getWeakCharacters }) {
+export default function Flashcards({ recordAttempt, updateStreak, getMastery, getWeakCharacters, autoPlayAudio = false }) {
   const [deck, setDeck] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -106,8 +106,8 @@ export default function Flashcards({ recordAttempt, updateStreak, getMastery, ge
   };
 
   const handleFlip = () => {
-    if (!flipped && currentCard) {
-      // Play audio when revealing the answer
+    if (!flipped && currentCard && autoPlayAudio) {
+      // Auto-play audio when revealing the answer (if enabled in settings)
       playHiragana(currentCard.char, currentCard.romaji);
     }
     setFlipped(!flipped);

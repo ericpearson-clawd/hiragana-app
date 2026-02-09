@@ -10,6 +10,7 @@ const initialProgress = {
   settings: {
     darkMode: false,
     soundEnabled: true,
+    autoPlayAudio: false,
   }
 };
 
@@ -123,6 +124,17 @@ export function useProgress() {
     }));
   }, []);
 
+  // Toggle auto-play audio
+  const toggleAutoPlayAudio = useCallback(() => {
+    setProgress(prev => ({
+      ...prev,
+      settings: {
+        ...prev.settings,
+        autoPlayAudio: !prev.settings.autoPlayAudio,
+      }
+    }));
+  }, []);
+
   // Reset all progress
   const resetProgress = useCallback(() => {
     setProgress(initialProgress);
@@ -137,6 +149,7 @@ export function useProgress() {
     getWeakCharacters,
     getUnpracticedCount,
     toggleDarkMode,
+    toggleAutoPlayAudio,
     resetProgress,
   };
 }

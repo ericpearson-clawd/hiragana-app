@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export default function Settings({ progress, toggleDarkMode, resetProgress }) {
+export default function Settings({ progress, toggleDarkMode, toggleAutoPlayAudio, resetProgress }) {
   const [showConfirm, setShowConfirm] = useState(false);
 
   const handleReset = () => {
@@ -33,17 +33,16 @@ export default function Settings({ progress, toggleDarkMode, resetProgress }) {
 
           <div className="setting-item">
             <div className="setting-info">
-              <h3>Sound Effects</h3>
-              <p>Play sounds for correct/incorrect answers</p>
+              <h3>Auto-play Audio 🔊</h3>
+              <p>Automatically play pronunciation when revealing flashcards</p>
             </div>
             <button 
-              className={`toggle-switch ${progress.settings.soundEnabled ? 'active' : ''}`}
-              disabled
-              aria-label="Toggle sound (coming soon)"
+              className={`toggle-switch ${progress.settings.autoPlayAudio ? 'active' : ''}`}
+              onClick={toggleAutoPlayAudio}
+              aria-label="Toggle auto-play audio"
             >
               <span className="toggle-knob"></span>
             </button>
-            <span className="coming-soon">Coming Soon</span>
           </div>
 
           <div className="setting-divider"></div>
