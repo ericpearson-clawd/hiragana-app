@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 
-export default function Header({ darkMode, onToggleTheme }) {
+export default function Header({ darkMode, onToggleTheme, streak = 0, longestStreak = 0, achievementsUnlocked = 0, achievementsTotal = 8 }) {
   const location = useLocation();
   
   const navItems = [
@@ -8,6 +8,7 @@ export default function Header({ darkMode, onToggleTheme }) {
     { path: '/flashcards', label: 'Flashcards', icon: '🎴' },
     { path: '/quiz', label: 'Quiz', icon: '❓' },
     { path: '/progress', label: 'Progress', icon: '📊' },
+    { path: '/achievements', label: 'Achievements', icon: '🏆', badge: achievementsUnlocked > 0 ? achievementsUnlocked : null },
     { path: '/settings', label: 'Settings', icon: '⚙️' },
   ];
 
@@ -20,6 +21,13 @@ export default function Header({ darkMode, onToggleTheme }) {
             <span className="logo-text">Hiragana Master</span>
           </Link>
           
+          {streak > 0 && (
+            <div className="streak-badge" title={`Longest streak: ${longestStreak} days`}>
+              <span className="streak-flame">🔥</span>
+              <span className="streak-count">{streak}</span>
+            </div>
+          )}
+          
           <nav className="nav">
             {navItems.map(item => (
               <Link
@@ -27,7 +35,10 @@ export default function Header({ darkMode, onToggleTheme }) {
                 to={item.path}
                 className={`nav-link ${location.pathname === item.path ? 'active' : ''}`}
               >
-                <span className="nav-icon">{item.icon}</span>
+                <span className="nav-icon-wrapper">
+                  <span className="nav-icon">{item.icon}</span>
+                  {item.badge && <span className="nav-badge">{item.badge}</span>}
+                </span>
                 <span className="nav-label">{item.label}</span>
               </Link>
             ))}
@@ -107,12 +118,66 @@ export default function Header({ darkMode, onToggleTheme }) {
           color: white;
         }
         
+        .nav-icon-wrapper {
+          position: relative;
+          display: inline-flex;
+        }
+        
         .nav-icon {
           font-size: 1.25rem;
         }
         
+        .nav-badge {
+          position: absolute;
+          top: -6px;
+          right: -8px;
+          background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+          color: white;
+          font-size: 0.625rem;
+          font-weight: 700;
+          padding: 0.125rem 0.375rem;
+          border-radius: 10px;
+          min-width: 16px;
+          text-align: center;
+          box-shadow: 0 2px 6px rgba(255, 215, 0, 0.4);
+        }
+        
         .theme-toggle {
           font-size: 1.25rem;
+        }
+        
+        .streak-badge {
+          display: flex;
+          align-items: center;
+          gap: 0.375rem;
+          background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+          padding: 0.375rem 0.75rem;
+          border-radius: 20px;
+          font-weight: 700;
+          color: white;
+          font-size: 0.875rem;
+          box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+          animation: streakPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes streakPulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
+        
+        .streak-flame {
+          font-size: 1.125rem;
+          animation: flameFlicker 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes flameFlicker {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.8; }
+        }
+        
+        .streak-count {
+          font-size: 1rem;
+          line-height: 1;
         }
         
         @media (max-width: 768px) {
@@ -151,6 +216,23 @@ export default function Header({ darkMode, onToggleTheme }) {
           
           .theme-toggle {
             display: none;
+          }
+          
+          .streak-badge {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+          }
+          
+          .streak-flame {
+            font-size: 1rem;
+          }
+          
+          .streak-count {
+            font-size: 0.875rem;
           }
         }
       `}</style>

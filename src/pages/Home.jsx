@@ -1,9 +1,35 @@
 import { Link } from 'react-router-dom';
+import AnimatedProgressBar from '../components/AnimatedProgressBar';
 
-export default function Home({ progress, getOverallMastery, getUnpracticedCount }) {
+export default function Home({ progress, getOverallMastery, getUnpracticedCount, getMastery }) {
   const mastery = getOverallMastery();
   const unpracticed = getUnpracticedCount();
-  const practiced = 76 - unpracticed;
+  const practiced = 109 - unpracticed;
+  const longestStreak = progress.longestStreak || progress.streak;
+
+  // Calculate mastery distribution
+  const getMasteryDistribution = () => {
+    const chars = Object.keys(progress.characters);
+    const distribution = {
+      new: 109 - chars.length,
+      apprentice: 0,  // 1-49%
+      guru: 0,        // 50-79%
+      master: 0,      // 80-94%
+      enlightened: 0  // 95-100%
+    };
+
+    chars.forEach(char => {
+      const m = getMastery(char);
+      if (m < 50) distribution.apprentice++;
+      else if (m < 80) distribution.guru++;
+      else if (m < 95) distribution.master++;
+      else distribution.enlightened++;
+    });
+
+    return distribution;
+  };
+
+  const distribution = getMasteryDistribution();
 
   return (
     <div className="page">
@@ -17,22 +43,117 @@ export default function Home({ progress, getOverallMastery, getUnpracticedCount 
           </p>
         </div>
 
-        <div className="stats-grid animate-slide-up">
-          <div className="card stat-card">
-            <div className="stat-value">{progress.streak}</div>
-            <div className="stat-label">Day Streak 🔥</div>
+        {/* Enhanced Streak Display */}
+        <div className="streak-banner animate-fade-in">
+          <div className="streak-main">
+            <div className="streak-flame">🔥</div>
+            <div className="streak-info">
+              <div className="streak-current">{progress.streak}</div>
+              <div className="streak-label">Day Streak</div>
+            </div>
           </div>
+          {longestStreak > progress.streak && (
+            <div className="streak-best">
+              <span className="streak-best-label">Best:</span>
+              <span className="streak-best-value">{longestStreak} days</span>
+            </div>
+          )}
+        </div>
+
+        {/* Mastery Distribution */}
+        <div className="mastery-overview animate-slide-up">
+          <h3 className="mastery-title">Mastery Progress</h3>
+          <div className="mastery-bars">
+            {distribution.enlightened > 0 && (
+              <div className="mastery-bar-row enlightened">
+                <div className="mastery-bar-label">
+                  <span className="mastery-dot"></span>
+                  Enlightened ({distribution.enlightened})
+                </div>
+                <AnimatedProgressBar 
+                  value={distribution.enlightened} 
+                  max={109} 
+                  height="12px"
+                  showPercentage={false}
+                  color="var(--enlightened-color)"
+                />
+              </div>
+            )}
+            {distribution.master > 0 && (
+              <div className="mastery-bar-row master">
+                <div className="mastery-bar-label">
+                  <span className="mastery-dot"></span>
+                  Master ({distribution.master})
+                </div>
+                <AnimatedProgressBar 
+                  value={distribution.master} 
+                  max={109} 
+                  height="12px"
+                  showPercentage={false}
+                  color="var(--master-color)"
+                />
+              </div>
+            )}
+            {distribution.guru > 0 && (
+              <div className="mastery-bar-row guru">
+                <div className="mastery-bar-label">
+                  <span className="mastery-dot"></span>
+                  Guru ({distribution.guru})
+                </div>
+                <AnimatedProgressBar 
+                  value={distribution.guru} 
+                  max={109} 
+                  height="12px"
+                  showPercentage={false}
+                  color="var(--guru-color)"
+                />
+              </div>
+            )}
+            {distribution.apprentice > 0 && (
+              <div className="mastery-bar-row apprentice">
+                <div className="mastery-bar-label">
+                  <span className="mastery-dot"></span>
+                  Apprentice ({distribution.apprentice})
+                </div>
+                <AnimatedProgressBar 
+                  value={distribution.apprentice} 
+                  max={109} 
+                  height="12px"
+                  showPercentage={false}
+                  color="var(--apprentice-color)"
+                />
+              </div>
+            )}
+            {distribution.new > 0 && (
+              <div className="mastery-bar new">
+                <div className="mastery-bar-label">
+                  <span className="mastery-dot"></span>
+                  New
+                </div>
+                <div className="mastery-bar-fill" style={{ width: `${(distribution.new / 109) * 100}%` }}>
+                  <span className="mastery-bar-count">{distribution.new}</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="stats-grid animate-slide-up">
           <div className="card stat-card">
             <div className="stat-value">{practiced}</div>
             <div className="stat-label">Characters Seen</div>
           </div>
           <div className="card stat-card">
             <div className="stat-value">{mastery}%</div>
-            <div className="stat-label">Mastery</div>
+            <div className="stat-label">Overall Mastery</div>
           </div>
           <div className="card stat-card">
             <div className="stat-value">{progress.totalSessions}</div>
-            <div className="stat-label">Sessions</div>
+            <div className="stat-label">Total Sessions</div>
+          </div>
+          <div className="card stat-card">
+            <div className="stat-value">{progress.perfectSessions || 0}</div>
+            <div className="stat-label">Perfect Sessions</div>
           </div>
         </div>
 
@@ -89,6 +210,153 @@ export default function Home({ progress, getOverallMastery, getUnpracticedCount 
       </div>
 
       <style>{`
+        .streak-banner {
+          background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+          border-radius: var(--radius-lg);
+          padding: 1.5rem;
+          margin-bottom: 2rem;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+        }
+
+        .streak-main {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+        }
+
+        .streak-flame {
+          font-size: 3rem;
+          animation: flicker 2s ease-in-out infinite;
+        }
+
+        @keyframes flicker {
+          0%, 100% { transform: scale(1); filter: brightness(1); }
+          50% { transform: scale(1.1); filter: brightness(1.2); }
+        }
+
+        .streak-info {
+          color: white;
+        }
+
+        .streak-current {
+          font-size: 2.5rem;
+          font-weight: 700;
+          line-height: 1;
+        }
+
+        .streak-label {
+          font-size: 0.875rem;
+          opacity: 0.9;
+          margin-top: 0.25rem;
+        }
+
+        .streak-best {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          color: white;
+          opacity: 0.9;
+        }
+
+        .streak-best-label {
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+
+        .streak-best-value {
+          font-size: 1.25rem;
+          font-weight: 600;
+        }
+
+        .mastery-overview {
+          background: var(--bg-secondary);
+          border: 1px solid var(--border);
+          border-radius: var(--radius-lg);
+          padding: 1.5rem;
+          margin-bottom: 2rem;
+        }
+
+        .mastery-title {
+          font-size: 1rem;
+          color: var(--text-secondary);
+          margin-bottom: 1rem;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+
+        .mastery-bars {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+
+        .mastery-bar {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+        }
+
+        .mastery-bar-label {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          min-width: 120px;
+          font-size: 0.875rem;
+          color: var(--text-muted);
+        }
+
+        .mastery-dot {
+          width: 12px;
+          height: 12px;
+          border-radius: 3px;
+        }
+
+        .mastery-bar.new .mastery-dot { background: #94A3B8; }
+        .mastery-bar.apprentice .mastery-dot { background: #F59E0B; }
+        .mastery-bar.guru .mastery-dot { background: #3B82F6; }
+        .mastery-bar.master .mastery-dot { background: #A855F7; }
+        .mastery-bar.enlightened .mastery-dot { background: #10B981; }
+
+        .mastery-bar-fill {
+          flex: 1;
+          height: 32px;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          padding: 0 0.75rem;
+          transition: width 0.6s ease;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .mastery-bar.new .mastery-bar-fill { 
+          background: linear-gradient(90deg, #94A3B8 0%, #CBD5E1 100%);
+        }
+        .mastery-bar.apprentice .mastery-bar-fill { 
+          background: linear-gradient(90deg, #F59E0B 0%, #FBBF24 100%);
+        }
+        .mastery-bar.guru .mastery-bar-fill { 
+          background: linear-gradient(90deg, #3B82F6 0%, #60A5FA 100%);
+        }
+        .mastery-bar.master .mastery-bar-fill { 
+          background: linear-gradient(90deg, #A855F7 0%, #C084FC 100%);
+        }
+        .mastery-bar.enlightened .mastery-bar-fill { 
+          background: linear-gradient(90deg, #10B981 0%, #34D399 100%);
+        }
+
+        .mastery-bar-count {
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: white;
+          text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
         .home-hero {
           text-align: center;
           padding: 3rem 0;
@@ -226,6 +494,21 @@ export default function Home({ progress, getOverallMastery, getUnpracticedCount 
 
           .info-grid {
             grid-template-columns: repeat(2, 1fr);
+          }
+
+          .streak-banner {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+          }
+
+          .streak-best {
+            align-items: center;
+          }
+
+          .mastery-bar-label {
+            min-width: 100px;
+            font-size: 0.75rem;
           }
         }
 

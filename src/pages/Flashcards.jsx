@@ -4,7 +4,7 @@ import { hiragana, shuffle, groups, yoonGroups, allGroups } from '../data/hiraga
 import { getMnemonic } from '../data/mnemonics';
 import { playHiragana, isAudioSupported } from '../utils/audio';
 
-export default function Flashcards({ recordAttempt, updateStreak, getMastery, getWeakCharacters, autoPlayAudio = false }) {
+export default function Flashcards({ recordAttempt, recordPerfectSession, updateStreak, getMastery, getWeakCharacters, autoPlayAudio = false }) {
   const [deck, setDeck] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -149,13 +149,21 @@ export default function Flashcards({ recordAttempt, updateStreak, getMastery, ge
       // Session complete - trigger confetti if good accuracy
       const total = sessionStats.correct + sessionStats.incorrect + 1;
       const correctTotal = sessionStats.correct + (knew ? 1 : 0);
-      if (correctTotal / total >= 0.8) {
+      const accuracy = correctTotal / total;
+      
+      if (accuracy >= 0.8) {
         confetti({
           particleCount: 100,
           spread: 70,
           origin: { y: 0.6 }
         });
       }
+      
+      // Record perfect session achievement
+      if (accuracy === 1.0) {
+        recordPerfectSession();
+      }
+      
       setIsStarted(false);
     }
   };

@@ -5,8 +5,11 @@ import Home from './pages/Home';
 import Flashcards from './pages/Flashcards';
 import Quiz from './pages/Quiz';
 import Progress from './pages/Progress';
+import Achievements from './pages/Achievements';
 import Settings from './pages/Settings';
 import { useProgress } from './hooks/useProgress';
+import { useAchievements } from './hooks/useAchievements';
+import AchievementUnlocked from './components/AchievementUnlocked';
 import './index.css';
 
 function App() {
@@ -14,6 +17,7 @@ function App() {
     progress,
     updateStreak,
     recordAttempt,
+    recordPerfectSession,
     getMastery,
     getOverallMastery,
     getWeakCharacters,
@@ -22,6 +26,13 @@ function App() {
     toggleAutoPlayAudio,
     resetProgress,
   } = useProgress();
+
+  const {
+    newlyUnlocked,
+    dismissNewAchievement,
+    getUnlockedCount,
+    getTotalCount,
+  } = useAchievements(progress, getMastery);
 
   // Apply dark mode
   useEffect(() => {
@@ -37,6 +48,14 @@ function App() {
         <Header 
           darkMode={progress.settings.darkMode} 
           onToggleTheme={toggleDarkMode}
+          streak={progress.streak}
+          longestStreak={progress.longestStreak}
+          achievementsUnlocked={getUnlockedCount()}
+          achievementsTotal={getTotalCount()}
+        />
+        <AchievementUnlocked 
+          achievement={newlyUnlocked}
+          onDismiss={dismissNewAchievement}
         />
         <main className="main-content">
           <Routes>
@@ -45,6 +64,7 @@ function App() {
               element={
                 <Home 
                   progress={progress}
+                  getMastery={getMastery}
                   getOverallMastery={getOverallMastery}
                   getUnpracticedCount={getUnpracticedCount}
                 />
@@ -55,6 +75,7 @@ function App() {
               element={
                 <Flashcards 
                   recordAttempt={recordAttempt}
+                  recordPerfectSession={recordPerfectSession}
                   updateStreak={updateStreak}
                   getMastery={getMastery}
                   getWeakCharacters={getWeakCharacters}
@@ -80,6 +101,10 @@ function App() {
                   getOverallMastery={getOverallMastery}
                 />
               } 
+            />
+            <Route 
+              path="/achievements" 
+              element={<Achievements />} 
             />
             <Route 
               path="/settings" 

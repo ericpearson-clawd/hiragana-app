@@ -4,8 +4,10 @@ const STORAGE_KEY = 'hiragana-master-progress';
 
 const initialProgress = {
   streak: 0,
+  longestStreak: 0,
   lastPracticeDate: null,
   totalSessions: 0,
+  perfectSessions: 0,
   characters: {},
   settings: {
     darkMode: false,
@@ -53,9 +55,12 @@ export function useProgress() {
         newStreak = 1; // Reset streak
       }
       
+      const newLongestStreak = Math.max(prev.longestStreak || 0, newStreak);
+      
       return {
         ...prev,
         streak: newStreak,
+        longestStreak: newLongestStreak,
         lastPracticeDate: today,
         totalSessions: prev.totalSessions + 1,
       };
@@ -78,6 +83,14 @@ export function useProgress() {
         }
       };
     });
+  }, []);
+
+  // Record a perfect session (100% accuracy)
+  const recordPerfectSession = useCallback(() => {
+    setProgress(prev => ({
+      ...prev,
+      perfectSessions: (prev.perfectSessions || 0) + 1,
+    }));
   }, []);
 
   // Get mastery percentage for a character (0-100)
@@ -144,6 +157,7 @@ export function useProgress() {
     progress,
     updateStreak,
     recordAttempt,
+    recordPerfectSession,
     getMastery,
     getOverallMastery,
     getWeakCharacters,

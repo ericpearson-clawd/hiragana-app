@@ -2,6 +2,8 @@ import { useState, useCallback, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { hiragana, shuffle } from '../data/hiragana';
 import { playHiragana, stopAudio } from '../utils/audio';
+import { playSuccessChime, playPerfectChime } from '../utils/celebrationSounds';
+import SparkleAnimation from '../components/SparkleAnimation';
 
 export default function Quiz({ recordAttempt, updateStreak }) {
   const [quizMode, setQuizMode] = useState(null); // 'reading' or 'recognition'
@@ -12,6 +14,7 @@ export default function Quiz({ recordAttempt, updateStreak }) {
   const [sessionStats, setSessionStats] = useState({ correct: 0, incorrect: 0 });
   const [streak, setStreak] = useState(0);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [showSparkles, setShowSparkles] = useState(false);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -95,6 +98,9 @@ export default function Quiz({ recordAttempt, updateStreak }) {
     if (option.correct) {
       setSessionStats(prev => ({ ...prev, correct: prev.correct + 1 }));
       setStreak(prev => prev + 1);
+      // Trigger success celebration
+      setShowSparkles(true);
+      playSuccessChime();
     } else {
       setSessionStats(prev => ({ ...prev, incorrect: prev.incorrect + 1 }));
       setStreak(0);
@@ -126,6 +132,17 @@ export default function Quiz({ recordAttempt, updateStreak }) {
           origin: { y: 0.6 }
         });
       }
+      // Perfect score celebration
+      if (accuracy === 100) {
+        playPerfectChime();
+        setTimeout(() => {
+          confetti({
+            particleCount: 150,
+            spread: 100,
+            origin: { y: 0.5 }
+          });
+        }, 300);
+      }
       setQuizMode('complete');
       stopAudio();
     }
@@ -138,6 +155,7 @@ export default function Quiz({ recordAttempt, updateStreak }) {
   if (quizMode === 'complete') {
     const total = sessionStats.correct + sessionStats.incorrect;
     const accuracy = Math.round((sessionStats.correct / total) * 100);
+    const isPerfect = accuracy === 100;
     
     let grade = 'F';
     let gradeColor = 'var(--error)';
@@ -151,6 +169,12 @@ export default function Quiz({ recordAttempt, updateStreak }) {
       <div className="page">
         <div className="container">
           <div className="quiz-complete animate-fade-in">
+            {isPerfect && (
+              <div className="perfect-badge animate-bounce">
+                <span className="perfect-icon">🏆</span>
+                <span className="perfect-text">PERFECT!</span>
+              </div>
+            )}
             <div className="complete-grade" style={{ color: gradeColor }}>{grade}</div>
             <h2>Quiz Complete!</h2>
             <p className="complete-subtitle">You answered {total} questions</p>
@@ -242,7 +266,8 @@ export default function Quiz({ recordAttempt, updateStreak }) {
           </div>
         </div>
 
-        <div className="quiz-question animate-fade-in">
+        <div className="quiz-question animate-fade-in" style={{ position: 'relative' }}>
+          <SparkleAnimation trigger={showSparkles} onComplete={() => setShowSparkles(false)} />
           <div className="question-with-audio">
             <div className={`question-display ${currentQuestion?.displayType === 'hiragana' ? 'jp' : ''}`}>
               {currentQuestion?.display}
@@ -581,6 +606,45 @@ const styles = `
     flex-direction: column;
     gap: 1rem;
     align-items: center;
+  }
+
+  .perfect-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    padding: 0.75rem 1.5rem;
+    border-radius: 24px;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 16px rgba(255, 215, 0, 0.4);
+    margin-bottom: 1rem;
+  }
+
+  .perfect-icon {
+    font-size: 1.5rem;
+    animation: perfectSpin 2s ease-in-out infinite;
+  }
+
+  @keyframes perfectSpin {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-15deg); }
+    75% { transform: rotate(15deg); }
+  }
+
+  .perfect-text {
+    letter-spacing: 0.1em;
+  }
+
+  @keyframes animate-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .animate-bounce {
+    animation: animate-bounce 1s ease-in-out 3;
   }
 
   @media (max-width: 640px) {

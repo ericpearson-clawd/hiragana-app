@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { hiragana, groups, yoonGroups, TOTAL_ALL } from '../data/hiragana';
 import { playHiragana } from '../utils/audio';
+import MasteryBadge from '../components/MasteryBadge';
+import AnimatedProgressBar from '../components/AnimatedProgressBar';
 
 export default function Progress({ progress, getMastery, getOverallMastery }) {
   const [selectedChar, setSelectedChar] = useState(null);
