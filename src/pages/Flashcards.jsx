@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import confetti from 'canvas-confetti';
 import { hiragana, shuffle, groups, yoonGroups, allGroups } from '../data/hiragana';
 import { getMnemonic } from '../data/mnemonics';
+import { playHiragana, isAudioSupported } from '../utils/audio';
 
 export default function Flashcards({ recordAttempt, updateStreak, getMastery, getWeakCharacters }) {
   const [deck, setDeck] = useState([]);
@@ -105,7 +106,18 @@ export default function Flashcards({ recordAttempt, updateStreak, getMastery, ge
   };
 
   const handleFlip = () => {
+    if (!flipped && currentCard) {
+      // Play audio when revealing the answer
+      playHiragana(currentCard.char, currentCard.romaji);
+    }
     setFlipped(!flipped);
+  };
+
+  const handlePlayAudio = (e) => {
+    e.stopPropagation();
+    if (currentCard) {
+      playHiragana(currentCard.char, currentCard.romaji);
+    }
   };
 
   const handleResponse = (knew) => {
@@ -287,6 +299,14 @@ export default function Flashcards({ recordAttempt, updateStreak, getMastery, ge
                 <div className="card-hint">Tap to reveal</div>
               </div>
               <div className="character-card-back">
+                <button 
+                  className="audio-btn"
+                  onClick={handlePlayAudio}
+                  title="Play pronunciation"
+                  aria-label="Play audio"
+                >
+                  🔊
+                </button>
                 <div className="hiragana-display jp">{currentCard?.char}</div>
                 <div className="romaji-display">{currentCard?.romaji}</div>
                 {showHint && getMnemonic(currentCard?.char) && (
@@ -408,6 +428,32 @@ const styles = `
 
   .hint-btn:hover {
     background: rgba(255,255,255,0.3);
+  }
+
+  .audio-btn {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    font-size: 1.25rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .audio-btn:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.1);
+  }
+
+  .audio-btn:active {
+    transform: scale(0.95);
   }
 
   .card-hint {

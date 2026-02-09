@@ -1,6 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { hiragana, shuffle } from '../data/hiragana';
+import { playHiragana } from '../utils/audio';
+import { playHiragana, stopAudio } from '../utils/audio';
 
 export default function Quiz({ recordAttempt, updateStreak }) {
   const [quizMode, setQuizMode] = useState(null); // 'reading' or 'recognition'
@@ -63,13 +65,22 @@ export default function Quiz({ recordAttempt, updateStreak }) {
 
   const startQuiz = (mode) => {
     setQuizMode(mode);
-    setQuestions(generateQuestions(mode));
+    const newQuestions = generateQuestions(mode);
+    setQuestions(newQuestions);
     setCurrentIndex(0);
     setSelectedAnswer(null);
     setShowResult(false);
     setSessionStats({ correct: 0, incorrect: 0 });
     setStreak(0);
     updateStreak();
+    
+    // Play audio for first question if in reading mode
+    if (mode === 'reading' && newQuestions[0]) {
+      setTimeout(() => {
+        const item = hiragana.find(h => h.char === newQuestions[0].char);
+        if (item) playHiragana(item.char, item.romaji);
+      }, 300);
+    }
   };
 
   const handleAnswer = (option) => {
@@ -92,9 +103,18 @@ export default function Quiz({ recordAttempt, updateStreak }) {
 
   const nextQuestion = () => {
     if (currentIndex < questions.length - 1) {
-      setCurrentIndex(currentIndex + 1);
+      const nextIdx = currentIndex + 1;
+      setCurrentIndex(nextIdx);
       setSelectedAnswer(null);
       setShowResult(false);
+      
+      // Play audio for next question if in reading mode
+      if (quizMode === 'reading' && questions[nextIdx]) {
+        setTimeout(() => {
+          const item = hiragana.find(h => h.char === questions[nextIdx].char);
+          if (item) playHiragana(item.char, item.romaji);
+        }, 300);
+      }
     } else {
       // Quiz complete - trigger confetti if good score
       const total = sessionStats.correct + sessionStats.incorrect + 1;
@@ -107,6 +127,7 @@ export default function Quiz({ recordAttempt, updateStreak }) {
         });
       }
       setQuizMode('complete');
+      stopAudio();
     }
   };
 
@@ -222,8 +243,17 @@ export default function Quiz({ recordAttempt, updateStreak }) {
         </div>
 
         <div className="quiz-question animate-fade-in">
-          <div className={`question-display ${currentQuestion?.displayType === 'hiragana' ? 'jp' : ''}`}>
-            {currentQuestion?.display}
+          <div className="question-with-audio">
+            <div className={`question-display ${currentQuestion?.displayType === 'hiragana' ? 'jp' : ''}`}>
+              {currentQuestion?.display}
+            </div>
+            <button
+              className="audio-btn"
+              onClick={() => playHiragana(currentQuestion?.char, currentQuestion?.romaji)}
+              aria-label="Play pronunciation"
+            >
+              🔊
+            </button>
           </div>
           <p className="question-prompt">
             {quizMode === 'reading' ? 'What is the romaji?' : 'Which hiragana is this?'}
@@ -306,11 +336,37 @@ const styles = `
     margin-bottom: 2rem;
   }
 
+  .question-with-audio {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+  }
+
   .question-display {
     font-size: 5rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
     color: var(--text-primary);
+  }
+
+  .audio-btn {
+    font-size: 1.5rem;
+    background: var(--bg-secondary);
+    border: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .audio-btn:hover {
+    background: var(--bg-tertiary);
+    transform: scale(1.1);
+  }
+
+  .audio-btn:active {
+    transform: scale(0.95);
   }
 
   .question-display.jp {
